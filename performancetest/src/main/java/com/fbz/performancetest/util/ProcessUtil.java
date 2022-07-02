@@ -12,9 +12,10 @@ public class ProcessUtil {
         return process;
     }
 
-    public String read() throws IOException {
-        byte [] bytes = process.getInputStream().readAllBytes();
-        return new String(bytes);
+    public static void main(String[] args) {
+        ProcessUtil p = new ProcessUtil();
+        String res = p.getBack("adb -H 10.130.131.79 -P 5039 -s e03c55d0 shell top -n 1 -p 7188 -o %CPU -b -q");
+        System.out.println(res);
     }
 
     public void write(String cmd) throws IOException {
@@ -37,7 +38,12 @@ public class ProcessUtil {
         }
     }
 
-    public static void main(String[] args) {
-
+    public String read() throws IOException {
+        byte[] bytes = process.getInputStream().readAllBytes();
+        if (bytes.length != 0) {
+            return new String(bytes);
+        } else {
+            return new String(process.getErrorStream().readAllBytes());
+        }
     }
 }

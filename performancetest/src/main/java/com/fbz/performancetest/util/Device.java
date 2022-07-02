@@ -4,6 +4,28 @@ public class Device {
     private String host = "localhost";
     private Integer port = 5037;
     private String serial = null;
+    private ProcessUtil processUtil = new ProcessUtil();
+
+    public void startApk(String packageName) {
+        String act = processUtil.getBack(adbShell(String.format("monkey -p  %s -c android.intent.category.LAUNCHER 1", packageName)));
+    }
+
+    public String adbShell(String keyWords) {
+        if (serial == null) {
+            throw new RuntimeException("not device");
+        }
+        return String.format("adb -H %s -P %s -s %s shell %s", host, port, serial, keyWords);
+    }
+
+    public boolean apkIsStart(String packageName) {
+        String res = processUtil.getBack(adbShell(String.format(("dumpsys window | grep %s"), packageName)));
+        System.out.println("device is start:" + res);
+        res = res.replace(" ", "");
+        if (res != null && !"".equals(res)) {
+            return true;
+        }
+        return false;
+    }
 
     public Device(String serial) {
         this.serial = serial;
@@ -42,5 +64,18 @@ public class Device {
 
     public void setSerial(String serial) {
         this.serial = serial;
+    }
+
+    public String getAllApk() {
+        return processUtil.getBack(adbShell("pm list package"));
+    }
+
+    public static void main(String[] args) {
+        Device device = new Device("10.130.131.79", 5039, "e03c55d0");
+        String res = device.getAllApk();
+        System.out.println(res);
+        device.startApk("com.happyelements.AndroidAnimal");
+        System.out.println(device.apkIsStart("com.happyelements.AndroidAnimal"));
+
     }
 }
