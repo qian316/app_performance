@@ -1,5 +1,6 @@
 package com.fbz.performancetest.util;
 
+import java.io.File;
 import java.util.Arrays;
 
 public class Device {
@@ -7,7 +8,7 @@ public class Device {
     private Integer port = 5037;
     private String serial = null;
     private ProcessUtil processUtil = new ProcessUtil();
-
+    private String adb = System.getProperty("user.dir") + File.separator + "adbtools" + File.separator + (System.getProperty("os.name").toLowerCase().contains("win") ? "Windows" + File.separator + "adb.exe" : System.getProperty("os.name").toLowerCase().contains("linux") ? "Linux" + File.separator + "adb" : "Darwin" + File.separator + "adb" );
     public void startApk(String packageName) {
         String act = processUtil.getBack(adbShell(String.format("monkey -p  %s -c android.intent.category.LAUNCHER 1", packageName)));
     }
@@ -16,7 +17,7 @@ public class Device {
         if (serial == null) {
             throw new RuntimeException("not device");
         }
-        return String.format("adb -H %s -P %s -s %s shell %s", host, port, serial, keyWords);
+        return String.format(adb + " -H %s -P %s -s %s shell %s", host, port, serial, keyWords);
     }
 
     public boolean apkIsStart(String packageName) {

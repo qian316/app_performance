@@ -12,6 +12,8 @@ public class PerformancetestApplication {
     public static final ConcurrentHashMap<String, Object> objectMap = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
+        System.out.println(System.getProperty("os.name"));
+        System.out.println(System.getProperty("user.dir"));
         SpringApplication.run(PerformancetestApplication.class, args);
     }
 
