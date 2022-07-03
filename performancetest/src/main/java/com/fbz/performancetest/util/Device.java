@@ -1,5 +1,7 @@
 package com.fbz.performancetest.util;
 
+import java.util.Arrays;
+
 public class Device {
     private String host = "localhost";
     private Integer port = 5037;
@@ -26,6 +28,18 @@ public class Device {
         }
         return false;
     }
+
+    public String getPid(String packageName) {
+        String res = processUtil.getBack(adbShell(String.format(("ps | grep  %s"), packageName)));
+        String [] info = res.split(" ");
+        info = Arrays.stream(info).filter(x -> !"".equals(x)).toArray(String[]::new);
+        System.out.println(Arrays.toString(info));
+        String pidNumber = info[1];
+        System.out.println("pidinfo is" + res);
+        System.out.println("pid is " + pidNumber);
+        return pidNumber;
+    }
+
 
     public Device(String serial) {
         this.serial = serial;

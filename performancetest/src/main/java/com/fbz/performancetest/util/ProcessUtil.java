@@ -32,18 +32,17 @@ public class ProcessUtil {
         }
         try {
             return this.read();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException("读取失败");
         }
     }
 
-    public String read() throws IOException {
+    public String read() throws IOException, InterruptedException {
         byte[] bytes = process.getInputStream().readAllBytes();
         if (bytes.length != 0) {
             return new String(bytes);
-        } else {
-            return new String(process.getErrorStream().readAllBytes());
         }
+        throw new RuntimeException(new String(process.getErrorStream().readAllBytes()));
     }
 }
