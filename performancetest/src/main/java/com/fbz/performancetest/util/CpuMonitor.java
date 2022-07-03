@@ -43,7 +43,7 @@ public class CpuMonitor extends Monitor {
             itemResultMap.put("time", dateFormat.format(new Date()));
             itemResultMap.put("cpu", cpuItemInfo);
             cpuResult.add(itemResultMap);
-            System.out.println(cpuResult);
+//            System.out.println(cpuResult);
         }
 
     }
@@ -65,6 +65,34 @@ public class CpuMonitor extends Monitor {
         return true;
     }
 
+
+    public Map<String, Double> getCpuResult() {
+        Map<String, String> itemResultMap = new HashMap<>();
+        itemResultMap.put("time", "end");
+        itemResultMap.put("cpu", "end");
+        cpuResult.add(itemResultMap);
+        int left = 0;
+        int right = 0;
+        double valueSum = 0;
+        Map<String, Double> res = new HashMap<>();
+        while (right < cpuResult.size()){
+            String time = cpuResult.get(left).get("time");
+            if("end".equals(time)){
+                cpuResult.remove(itemResultMap);
+                break;
+            }
+            if(time.equals(cpuResult.get(right).get("time"))){
+                valueSum += Double.valueOf(cpuResult.get(right).get("cpu"));
+                right++;
+            }else{
+                res.put(time, valueSum/(right - left));
+                left = right;
+                valueSum = 0;
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) throws InterruptedException {
         Device device = new Device("10.130.131.79", 5039, "e03c55d0");
         String apk = "com.happyelements.AndroidAnimal";
@@ -74,6 +102,24 @@ public class CpuMonitor extends Monitor {
             cpuMonitor.start();
             Thread.sleep(10000);
             cpuMonitor.stop();
+            System.out.println("res: "+cpuMonitor.getCpuResult());
         }
+//        Map<String, String> itemResultMap = new HashMap<>();
+//        itemResultMap.put("time", "11");
+//        itemResultMap.put("cpu", "20");
+//        Map<String, String> itemResultMap1 = new HashMap<>();
+//        itemResultMap1.put("time", "11");
+//        itemResultMap1.put("cpu", "22");
+//        Map<String, String> itemResultMap2 = new HashMap<>();
+//        itemResultMap2.put("time", "11");
+//        itemResultMap2.put("cpu", "23");
+//        Map<String, String> itemResultMap3 = new HashMap<>();
+//        itemResultMap3.put("time", "13");
+//        itemResultMap3.put("cpu", "13");
+//        cpuMonitor.cpuResult.add(itemResultMap);
+//        cpuMonitor.cpuResult.add(itemResultMap1);
+//        cpuMonitor.cpuResult.add(itemResultMap2);
+//        cpuMonitor.cpuResult.add(itemResultMap3);
+//        System.out.println(cpuMonitor.getCpuResult());
     }
 }
