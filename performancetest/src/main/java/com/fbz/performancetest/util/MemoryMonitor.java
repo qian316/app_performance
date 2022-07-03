@@ -60,7 +60,8 @@ public class MemoryMonitor extends Monitor{
         return true;
     }
 
-    public Map<String, Double> getMemoryResult() {
+    public List<Object[]> getMemoryResult() {
+        List<Object[]> resList = new ArrayList<>();
         Map<String, String> itemResultMap = new HashMap<>();
         itemResultMap.put("time", "end");
         itemResultMap.put("memory", "end");
@@ -68,23 +69,25 @@ public class MemoryMonitor extends Monitor{
         int left = 0;
         int right = 0;
         double valueSum = 0;
-        Map<String, Double> res = new HashMap<>();
-        while (right < memoryResult.size()){
+        while (right < memoryResult.size()) {
             String time = memoryResult.get(left).get("time");
-            if("end".equals(time)){
+            if ("end".equals(time)) {
                 memoryResult.remove(itemResultMap);
                 break;
             }
             if(time.equals(memoryResult.get(right).get("time"))){
                 valueSum += Double.valueOf(memoryResult.get(right).get("memory"));
                 right++;
-            }else{
-                res.put(time, (valueSum/(right - left))/1024);
+            }else {
+                Object[] tmp = new Object[2];
+                tmp[0] = time;
+                tmp[1] = (valueSum / (right - left)) / 1024;
+                resList.add(tmp);
                 left = right;
                 valueSum = 0;
             }
         }
-        return res;
+        return resList;
     }
 
     public static void main(String[] args) throws InterruptedException {

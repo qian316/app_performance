@@ -2,10 +2,7 @@ package com.fbz.performancetest.util;
 
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class CpuMonitor extends Monitor {
 
@@ -66,7 +63,8 @@ public class CpuMonitor extends Monitor {
     }
 
 
-    public Map<String, Double> getCpuResult() {
+    public List<Object[]> getCpuResult() {
+        List<Object[]> resList = new ArrayList<>();
         Map<String, String> itemResultMap = new HashMap<>();
         itemResultMap.put("time", "end");
         itemResultMap.put("cpu", "end");
@@ -74,23 +72,25 @@ public class CpuMonitor extends Monitor {
         int left = 0;
         int right = 0;
         double valueSum = 0;
-        Map<String, Double> res = new HashMap<>();
-        while (right < cpuResult.size()){
+        while (right < cpuResult.size()) {
             String time = cpuResult.get(left).get("time");
-            if("end".equals(time)){
+            if ("end".equals(time)) {
                 cpuResult.remove(itemResultMap);
                 break;
             }
             if(time.equals(cpuResult.get(right).get("time"))){
                 valueSum += Double.valueOf(cpuResult.get(right).get("cpu"));
                 right++;
-            }else{
-                res.put(time, valueSum/(right - left));
+            }else {
+                Object[] tmp = new Object[2];
+                tmp[0] = time;
+                tmp[1] = valueSum / (right - left);
+                resList.add(tmp);
                 left = right;
                 valueSum = 0;
             }
         }
-        return res;
+        return resList;
     }
 
     public static void main(String[] args) throws InterruptedException {
