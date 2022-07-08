@@ -1,7 +1,8 @@
 package com.fbz.performancetest.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fbz.performancetest.PerformancetestApplication;
+import com.fbz.performancetest.util.CpuMonitor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -10,6 +11,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 @Slf4j
-@ServerEndpoint("/send/{cpId}")
+@ServerEndpoint("/send/{pcId}")
 public class WebSocketServer {
 
     /**concurrent包的线程安全Set，用来存放每个客户端对应的WebSocket对象。*/
@@ -34,18 +36,18 @@ public class WebSocketServer {
      * 功调用的方法
      */
     @OnOpen
-    public void onOpen(Session session,@PathParam("cpId") String userId) {
+    public void onOpen(Session session, @PathParam("pcId") String pcId) {
         this.session = session;
-        this.cpId=userId;
-        if(webSocketMap.containsKey(userId)){
-            webSocketMap.remove(userId);
+        this.cpId = pcId;
+        if (webSocketMap.containsKey(pcId)) {
+            webSocketMap.remove(pcId);
             //加入set中
-            webSocketMap.put(userId,this);
-        }else{
+            webSocketMap.put(pcId, this);
+        } else {
             //加入set中
-            webSocketMap.put(userId,this);
+            webSocketMap.put(pcId, this);
         }
-        sendMessage("连接成功");
+        sendMessage("连接成功:" + pcId);
     }
 
     /**
@@ -67,8 +69,15 @@ public class WebSocketServer {
      * 客户端发送过来的消息
      **/
     @OnMessage
-    public void onMessage(String message, Session session) {
-
+    public void onMessage(String message, Session session) throws InterruptedException {
+        System.out.println("收到"+message);
+        while (true){
+                sendMessage(
+                    JSONObject.toJSONString((
+                            (CpuMonitor)PerformancetestApplication.objectMap.get(this.cpId+"cpu")
+                    ).getCpuResult()));
+            Thread.sleep(1000);
+        }
     }
 
 
