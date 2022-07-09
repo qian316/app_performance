@@ -3,6 +3,7 @@ package com.fbz.performancetest.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.fbz.performancetest.PerformancetestApplication;
 import com.fbz.performancetest.util.CpuMonitor;
+import com.fbz.performancetest.util.MemoryMonitor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -12,6 +13,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -72,10 +74,14 @@ public class WebSocketServer {
     public void onMessage(String message, Session session) throws InterruptedException {
         System.out.println("收到"+message);
         while (true){
-                sendMessage(
-                    JSONObject.toJSONString((
-                            (CpuMonitor)PerformancetestApplication.objectMap.get(this.cpId+"cpu")
-                    ).getCpuResult()));
+            HashMap<String, String > res = new HashMap<>();
+            res.put("cpu", JSONObject.toJSONString((
+                    (CpuMonitor)PerformancetestApplication.objectMap.get(this.cpId+"cpu")
+            ).getCpuResult()));
+            res.put("memory", JSONObject.toJSONString((
+                    (MemoryMonitor)PerformancetestApplication.objectMap.get(this.cpId+"memory")
+            ).getMemoryResult()));
+            sendMessage(res.toString());
             Thread.sleep(1000);
         }
     }

@@ -1,5 +1,7 @@
 package com.fbz.performancetest.util;
 
+import com.fbz.performancetest.config.ConnectException;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -28,13 +30,13 @@ public class ProcessUtil {
             this.exec(cmd);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("执行失败");
+            throw new ConnectException("执行失败");
         }
         try {
             return this.read();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            throw new RuntimeException("读取失败");
+            throw new ConnectException("读取失败");
         }
     }
 
@@ -43,6 +45,6 @@ public class ProcessUtil {
         if (bytes.length != 0) {
             return new String(bytes);
         }
-        throw new RuntimeException(new String(process.getErrorStream().readAllBytes()));
+        throw new ConnectException(new String(process.getErrorStream().readAllBytes()));
     }
 }
