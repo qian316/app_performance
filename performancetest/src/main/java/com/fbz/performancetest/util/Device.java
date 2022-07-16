@@ -2,6 +2,7 @@ package com.fbz.performancetest.util;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class Device {
     private String host = "localhost";
@@ -18,6 +19,11 @@ public class Device {
             throw new RuntimeException("not device");
         }
         return String.format(adb + " -H %s -P %s -s %s shell %s", host, port, serial, keyWords);
+    }
+
+    public ResultBean<Boolean> connectDevices() {
+        this.getAllPackage();
+        return ResultBeanUtil.success(true);
     }
 
     public boolean apkIsStart(String packageName) {
@@ -39,6 +45,16 @@ public class Device {
         System.out.println("pidinfo is" + res);
         System.out.println("pid is " + pidNumber);
         return pidNumber;
+    }
+
+    public ResultBean<String []> getAllPackage() {
+        String res = processUtil.getBack(adbShell("pm list package"));
+        res = res.strip();
+        String [] resArr = res.split(System.lineSeparator());
+        for(int i = 0; i < resArr.length; i++){
+            resArr[i] = resArr[i].replace("package:", "");
+        }
+        return ResultBeanUtil.success(resArr);
     }
 
 

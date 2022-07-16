@@ -15,6 +15,16 @@ public class AllController {
     @Resource
     Service service;
 
+    @RequestMapping("/connect")
+    public ResultBean<Boolean> connect(String pcId, String host, Integer port, String serial) {
+        return service.connect(pcId, host, port, serial);
+    }
+
+    @RequestMapping("/getallpackage")
+    public ResultBean<String []> getAllPackage(String pcId, String host, Integer port, String serial) {
+        return service.getAllPackage(pcId, host, port, serial);
+    }
+
     @RequestMapping("/start")
     public ResultBean<String> startTask(String pcId, String host, Integer port, String serial, String packageName) {
         return service.start(pcId, host, port, serial, packageName);

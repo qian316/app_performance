@@ -10,6 +10,18 @@ import java.util.List;
 public class ServiceImpl implements Service {
 
     @Override
+    public ResultBean<Boolean> connect(String pcId, String host, Integer port, String serial) {
+        Device device = new Device(host, port, serial);
+        return device.connectDevices();
+    }
+
+    @Override
+    public ResultBean<String []> getAllPackage(String pcId, String host, Integer port, String serial) {
+        Device device = new Device(host, port, serial);
+        return device.getAllPackage();
+    }
+
+    @Override
     public ResultBean<String> start(String pcId, String host, Integer port, String serial, String packageName) {
         Device device = new Device(host, port, serial);
         String apk = packageName;
