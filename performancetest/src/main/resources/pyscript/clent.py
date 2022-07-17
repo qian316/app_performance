@@ -3,6 +3,7 @@ from asyncio import subprocess
 from re import S
 from sys import stdout
 import requests
+from threading import Thread
 
 def start():
     res = requests.get("http://localhost:8080/start?pcId=1&host=10.130.131.79&port=5039&serial=e03c55d0&packageName=com.happyelements.AndroidAnimal")
@@ -48,9 +49,16 @@ class Feed(object):
         # 对收到的message进行解析
         print("收到", message)
         if "cmd:" in message:
-            cmds = message.split("cmd:")
-            res = subprocess.run(cmds[-1], stdout=subprocess.PIPE)
-            self.ws.send(str(1234))
+            # cmds = message.split("cmd:")
+            res = []
+            def run(cmd, res):
+                result = subprocess.run("1")
+                res.append(result)
+                print(result, "end")
+            th = Thread(target=run, args=cmds[-1])
+            th.start()
+            # th.join()
+            self.ws.send("1")
 
     def on_error(self, ws, error):
         """
