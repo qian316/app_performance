@@ -1,19 +1,13 @@
 package com.fbz.performancetest.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.fbz.performancetest.PerformancetestApplication;
-import com.fbz.performancetest.util.CpuMonitor;
-import com.fbz.performancetest.util.MemoryMonitor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,7 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WebSocketServer {
 
     /**concurrent包的线程安全Set，用来存放每个客户端对应的WebSocket对象。*/
-    private static ConcurrentHashMap<String,WebSocketServer> webSocketMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String,WebSocketServer> webSocketMap = PerformancetestApplication.webSocketMap;
+    public ArrayList<String> clientMessage = new ArrayList<>();
     /**与某个客户端的连接会话，需要通过它来给客户端发送数据*/
     private Session session;
     /**接收userId*/
@@ -49,7 +44,7 @@ public class WebSocketServer {
             //加入set中
             webSocketMap.put(pcId, this);
         }
-        sendMessage("连接成功:" + pcId);
+        System.out.println(String.format("connect %s", pcId));
     }
 
     /**
@@ -72,18 +67,8 @@ public class WebSocketServer {
      **/
     @OnMessage
     public void onMessage(String message, Session session) throws InterruptedException {
-        System.out.println("收到"+message);
-        while (true){
-            HashMap<String, String > res = new HashMap<>();
-            res.put("cpu", JSONObject.toJSONString((
-                    (CpuMonitor)PerformancetestApplication.objectMap.get(this.cpId+"cpu")
-            ).getCpuResult()));
-            res.put("memory", JSONObject.toJSONString((
-                    (MemoryMonitor)PerformancetestApplication.objectMap.get(this.cpId+"memory")
-            ).getMemoryResult()));
-            sendMessage(res.toString());
-            Thread.sleep(1000);
-        }
+        System.out.println(String.format("recv %s", message));
+        this.clientMessage.add(message);
     }
 
 
@@ -103,6 +88,7 @@ public class WebSocketServer {
      * 器主动推送
      */
     public void sendMessage(String message) {
+        System.out.println(String.format("server send %s", message));
         try {
             this.session.getBasicRemote().sendText(message);
         } catch (IOException e) {
@@ -110,17 +96,5 @@ public class WebSocketServer {
         }
     }
 
-    /**
-     *发送自定
-     *义消息
-     **/
-    public static void sendInfo(String message, String userId) {
-        log.info("发送消息到:"+userId+"，报文:"+message);
-        if(!StringUtils.isEmpty(userId) && webSocketMap.containsKey(userId)){
-            webSocketMap.get(userId).sendMessage(message);
-        }else{
-            log.error("用户"+userId+",不在线！");
-        }
-    }
 }
 

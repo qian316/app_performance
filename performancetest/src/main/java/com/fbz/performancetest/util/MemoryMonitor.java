@@ -20,7 +20,7 @@ public class MemoryMonitor extends Monitor{
     }
 
     public String getMemory() {
-        String memoryInfo = processUtil.getBack(device.adbShell(String.format("dumpsys meminfo %s | grep -w -A12 'App Summary'", packageName)));
+        String memoryInfo = processUtil.getBack(device.adbShell(String.format("dumpsys meminfo %s | grep -w -A12 'App Summary'", packageName)), this.device.pcId);
         String[] infoArr = memoryInfo.replace("\r", "").replace("\n", "").split(" ");
         infoArr = Arrays.stream(infoArr).filter(x -> !"".equals(x)).toArray(String[]::new);
 //        System.out.println(Arrays.toString(infoArr));

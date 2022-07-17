@@ -21,7 +21,7 @@ public class CpuMonitor extends Monitor {
     }
 
     public String getCpu() {
-        return processUtil.getBack(device.adbShell(String.format("top -n 1 -p %s", pid) + " -o %CPU -b -q"));
+        return processUtil.getBack(device.adbShell(String.format("top -n 1 -p %s", pid) + " -o %CPU -b -q"), this.device.pcId);
     }
 
     public void realGetCpuInfo() {

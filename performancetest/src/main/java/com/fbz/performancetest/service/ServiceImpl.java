@@ -11,19 +11,19 @@ public class ServiceImpl implements Service {
 
     @Override
     public ResultBean<Boolean> connect(String pcId, String host, Integer port, String serial) {
-        Device device = new Device(host, port, serial);
+        Device device = new Device(host, port, serial, pcId);
         return device.connectDevices();
     }
 
     @Override
     public ResultBean<String []> getAllPackage(String pcId, String host, Integer port, String serial) {
-        Device device = new Device(host, port, serial);
+        Device device = new Device(host, port, serial, pcId);
         return device.getAllPackage();
     }
 
     @Override
     public ResultBean<String> start(String pcId, String host, Integer port, String serial, String packageName) {
-        Device device = new Device(host, port, serial);
+        Device device = new Device(host, port, serial, pcId);
         String apk = packageName;
         device.startApk(apk);
         if (device.apkIsStart(apk)) {
