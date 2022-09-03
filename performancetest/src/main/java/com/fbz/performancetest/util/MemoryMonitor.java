@@ -91,7 +91,8 @@ public class MemoryMonitor extends Monitor{
     }
 
     public static void main(String[] args) throws InterruptedException {
-        Device device = new Device("10.130.131.79", 5039, "e03c55d0");
+//        Device device = new Device("10.130.131.79", 5039, "e03c55d0");
+        Device device = new Device("localhost", 5037, "21effc3a");
         String apk = "com.happyelements.AndroidAnimal";
         device.startApk(apk);
         if(device.apkIsStart(apk)){
