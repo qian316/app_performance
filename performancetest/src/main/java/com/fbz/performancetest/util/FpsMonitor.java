@@ -1,10 +1,6 @@
 package com.fbz.performancetest.util;
 
-import java.awt.desktop.ScreenSleepEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FpsMonitor extends Monitor {
 
@@ -124,7 +120,11 @@ public class FpsMonitor extends Monitor {
             timestamp /= nanosecondsPerSecond;
             timestamps.add(timestamp);
         }
-        return timestamps;
+        List resTuple = new ArrayList<>();
+        //设备刷新频率， 刷新的值
+        resTuple.add((int)( 1 / refreshPeriod));
+        resTuple.add(timestamps);
+        return resTuple;
     }
 
     @Override
