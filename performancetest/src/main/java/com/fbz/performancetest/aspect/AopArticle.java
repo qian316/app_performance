@@ -20,7 +20,7 @@ public class AopArticle {
 
 //    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @Pointcut("execution(* com.fbz.performancetest.controller..*.*(..))&&!execution(* com.fbz.performancetest.controller.WebSocketServer.*(..))")
+    @Pointcut("execution(* com.fbz.performancetest.controller..*.*(..))")
     public void point() {
     }
 

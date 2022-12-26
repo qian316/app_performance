@@ -2,17 +2,32 @@ package com.fbz.performancetest.util;
 
 import com.fbz.performancetest.PerformancetestApplication;
 import com.fbz.performancetest.config.ConnectException;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-
+@Slf4j
 public class ProcessUtil {
 
     private Process process = null;
 
-    public Process exec(String cmd) throws IOException {
-        process = Runtime.getRuntime().exec(cmd);
-        return process;
+    public String exec(String cmd) throws IOException {
+        try{
+            String [] commandCmds = cmd.split(" ");
+            ProcessBuilder processBuilder = new ProcessBuilder().command(commandCmds);
+            processBuilder.redirectErrorStream(true);
+            process = processBuilder.start();
+            byte [] bytes = process.getInputStream().readAllBytes();
+            return new String(bytes);
+        }catch (Exception e){
+            throw e;
+        }finally {
+            if (process.isAlive()) {
+                process.destroy();
+            }
+        }
     }
 
     public static void main(String[] args) {
@@ -21,13 +36,9 @@ public class ProcessUtil {
         System.out.println(res);
     }
 
-    public void write(String cmd) throws IOException {
-        OutputStream outputStream = process.getOutputStream();
-        outputStream.write(cmd.getBytes());
-    }
-
+    //core exec shell
     public String getBack(String cmd, String pcId) {
-        if (pcId != null && PerformancetestApplication.webSocketMap.getOrDefault(pcId, null) != null){
+   /*     if (pcId != null && PerformancetestApplication.webSocketMap.getOrDefault(pcId, null) != null){
             synchronized (ProcessUtil.class){
                 int beforesend = PerformancetestApplication.webSocketMap.get(pcId).clientMessage.size();
                 PerformancetestApplication.webSocketMap.get(pcId).sendMessage("cmd:" + cmd);
@@ -41,26 +52,13 @@ public class ProcessUtil {
                 }
                 throw new ConnectException("执行失败");
             }
-        }
+        }*/
         try {
-            this.exec(cmd);
+            return this.exec(cmd);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new ConnectException("执行失败");
+            log.error(String.format("执行失败 %s", cmd));
         }
-        try {
-            return this.read();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            throw new ConnectException("读取失败");
-        }
-    }
-
-    public String read() throws IOException, InterruptedException {
-        byte[] bytes = process.getInputStream().readAllBytes();
-        if (bytes.length != 0) {
-            return new String(bytes);
-        }
-        throw new ConnectException(new String(process.getErrorStream().readAllBytes()));
+        return null;
     }
 }

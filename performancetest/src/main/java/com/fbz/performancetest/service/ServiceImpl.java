@@ -31,8 +31,6 @@ public class ServiceImpl implements Service {
             MemoryMonitor memoryMonitor = new MemoryMonitor(device, apk);
             cpuMonitor.start();
             memoryMonitor.start();
-            PerformancetestApplication.objectMap.put(pcId + "cpu", cpuMonitor);
-            PerformancetestApplication.objectMap.put(pcId + "memory", memoryMonitor);
         }
         return ResultBeanUtil.success(pcId);
     }
