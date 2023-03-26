@@ -5,7 +5,7 @@ from builtins import *
 
 from func_timeout import func_set_timeout
 
-from command import ADB
+from .command import ADB
 
 # , Tidevice
 

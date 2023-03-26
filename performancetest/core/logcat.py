@@ -5,8 +5,8 @@ import threading
 import time
 from builtins import *
 
-from global_data import GlobalData as G, logger
-from performancetest.core.base.monitor import Monitor
+from .global_data import GlobalData as G, logger
+from .base.monitor import Monitor
 
 LOGCAT_FILE_NAE = "logcat.txt"
 

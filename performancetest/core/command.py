@@ -1,7 +1,7 @@
 import subprocess
 from builtins import *
 
-from global_data import logger
+from .global_data import logger
 
 
 def split_cmd(cmds):
