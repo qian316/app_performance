@@ -4,15 +4,15 @@ import signal
 import time
 from builtins import *
 
-import performancetest.core.global_data as G
-from performancetest.core.base.actuator import Actuator
-from performancetest.core.cpu import CpuMonitor
-from performancetest.core.device import AndroidDevice
-from performancetest.core.devicebattery import DeviceBatteryMonitor
-from performancetest.core.fps import FPSMonitor
-from performancetest.core.gpu import GpuMonitor
-from performancetest.core.logcat import Logcat
-from performancetest.core.memory import MemoryMonitor
+from global_data import  GlobalData as g
+from base.actuator import Actuator
+from cpu import CpuMonitor
+from device import AndroidDevice
+from devicebattery import DeviceBatteryMonitor
+from fps import FPSMonitor
+from gpu import GpuMonitor
+from logcat import Logcat
+from memory import MemoryMonitor
 
 
 class TaskHandle(Actuator):
@@ -52,6 +52,6 @@ class TaskHandle(Actuator):
 
 
 if __name__ == '__main__':
-    task_process = TaskHandle(serialno="emulator-5554", server_addr=["localhost", "5037"],
-                              package="com.road7.ddtdmxandroid.ld", save_dir="localhost")
+    task_process = TaskHandle(serialno="E6E4C20629011168", server_addr=["10.130.131.80", "5039"],
+                              package="com.happyelements.AndroidAnimal", save_dir="localhost")
     task_process.run()
