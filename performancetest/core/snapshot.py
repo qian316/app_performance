@@ -6,8 +6,8 @@ from pathlib import Path
 
 from airtest.core.android import Android
 
-from global_data import GlobalData as G, logger
-from base.monitor import Monitor
+from core.global_data import GlobalData as G, logger
+from core.base.monitor import Monitor
 
 
 # # from config import PIC_TRUE_LOG

@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from sqlalchemy import create_engine, Column, String, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from performancetest.core.device import logger
+from core.device import logger
 engine = create_engine('sqlite:///task.sqlite')
 Session = sessionmaker(bind=engine)
 Base = declarative_base()

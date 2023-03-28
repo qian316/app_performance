@@ -8,10 +8,10 @@ from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
 from func_timeout import func_set_timeout, FunctionTimedOut
 
-from performancetest.core.global_data import logger
-from performancetest.core.task_handle import TaskHandle
-from performancetest.web.dao import connect, Task
-from performancetest.web.entity import TaskEntity
+from core.global_data import logger
+from core.task_handle import TaskHandle
+from web.dao import connect, Task
+from web.entity import TaskEntity
 
 app = FastAPI()
 app.state.monitor_dict = collections.OrderedDict
@@ -61,8 +61,8 @@ async def run_task(request: Request, task: TaskEntity):
 
 
 def run_all_monitor():
-    task_process = TaskHandle(serialno="emulator-5554", server_addr=["localhost", "5037"],
-               package="com.road7.ddtdmxandroid.ld", save_dir="localhost")
+    task_process = TaskHandle(serialno="E6E4C20629011168", server_addr=["10.130.131.80", "5039"],
+                              package="com.happyelements.AndroidAnimal", save_dir="localhost")
     task_process.start()
     return task_process.pid
     # G.device = AndroidDevice()

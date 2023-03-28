@@ -3,19 +3,20 @@ import os
 import signal
 import time
 from builtins import *
+from multiprocessing import Process
 
-from global_data import  GlobalData as g
-from base.actuator import Actuator
-from cpu import CpuMonitor
-from device import AndroidDevice
-from devicebattery import DeviceBatteryMonitor
-from fps import FPSMonitor
-from gpu import GpuMonitor
-from logcat import Logcat
-from memory import MemoryMonitor
+from core.global_data import GlobalData as G
+from core.base.actuator import Actuator
+from core.cpu import CpuMonitor
+from core.device import AndroidDevice
+from core.devicebattery import DeviceBatteryMonitor
+from core.fps import FPSMonitor
+from core.gpu import GpuMonitor
+from core.logcat import Logcat
+from core.memory import MemoryMonitor
 
 
-class TaskHandle(Actuator):
+class TaskHandle(Process, Actuator):
 
     def __init__(self, serialno: str, server_addr: list[str], package: str, save_dir: str):
         super(TaskHandle, self).__init__()
@@ -23,6 +24,8 @@ class TaskHandle(Actuator):
         self.server_addr = server_addr
         self.package = package
         self.save_dir = save_dir
+        if not os.path.exists(self.save_dir):
+            os.makedirs(self.save_dir)
 
     def start(self):
         super().start()
@@ -31,7 +34,7 @@ class TaskHandle(Actuator):
         G.device = AndroidDevice(serialno=self.serialno, server_addr=self.server_addr,
                                  package=self.package, save_dir=self.save_dir)
         time.sleep(1)
-        # G.logcat = Logcat(package=self.package, save_dir=self.save_dir)
+        G.logcat = Logcat(package=self.package, save_dir=self.save_dir)
         time.sleep(1)
         G.device.start_app()
         CpuMonitor(os.path.join(self.save_dir, "cpu.csv")).start()

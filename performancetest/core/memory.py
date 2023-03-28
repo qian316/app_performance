@@ -5,8 +5,8 @@ import time
 import traceback
 from builtins import *
 
-from global_data import GlobalData as G, logger
-from base.monitor import Monitor
+from core.global_data import GlobalData as G, logger
+from core.base.monitor import Monitor
 
 
 class ParsMeminfo(object):
