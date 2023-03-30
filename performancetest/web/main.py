@@ -4,7 +4,6 @@ import datetime
 import os
 import time
 from builtins import *
-from threading import Thread
 
 from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
@@ -16,7 +15,6 @@ from web.dao import connect, Task
 from web.entity import TaskEntity
 
 app = FastAPI()
-app.state.monitor_dict = collections.OrderedDict
 BASE_CSV_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], "test_result")
 
 
@@ -55,7 +53,8 @@ async def run_task(request: Request, task: TaskEntity):
             Task.status != 2).count()
         if task_running_count > 0:
             raise Exception("当然仍有任务在进行无法创建新任务")
-        new_task = Task(host=client_host, port=port, serialno=serialno, start_time=datetime.datetime.now(), status=status, file_dir=file_dir, package=package)
+        new_task = Task(host=client_host, port=port, serialno=serialno, start_time=datetime.datetime.now(),
+                        status=status, file_dir=file_dir, package=package)
         session.add(new_task)
         session.commit()
         run_all_monitor(serialno, [client_host, port], package, file_dir)
