@@ -26,6 +26,7 @@ class TaskHandle(Process, Actuator):
         self.save_dir = save_dir
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
+        self.daemon = True
 
     def start(self):
         super().start()
@@ -33,16 +34,15 @@ class TaskHandle(Process, Actuator):
     def run(self):
         G.device = AndroidDevice(serialno=self.serialno, server_addr=self.server_addr,
                                  package=self.package, save_dir=self.save_dir)
-        time.sleep(1)
-        G.logcat = Logcat(package=self.package, save_dir=self.save_dir)
-        time.sleep(1)
         G.device.start_app()
+        time.sleep(0.03)
+        G.logcat = Logcat(package=self.package, save_dir=self.save_dir)
         CpuMonitor(os.path.join(self.save_dir, "cpu.csv")).start()
         MemoryMonitor(os.path.join(self.save_dir, "memory.csv")).start()
         FPSMonitor(os.path.join(self.save_dir, "fps.csv")).start()
         GpuMonitor(os.path.join(self.save_dir, "gpu.csv")).start()
         DeviceBatteryMonitor(os.path.join(self.save_dir, "devicebattery.csv")).start()
-        signal.signal(signal.SIGUSR1, self.stop())
+        # signal.signal(signal.SIGUSR1, self.stop())
 
     def stop(self):
         G.stop_event.clear()

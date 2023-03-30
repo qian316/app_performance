@@ -1,8 +1,10 @@
 # _*_ coding: utf-8 _*_
 import collections
+import datetime
 import os
 import time
 from builtins import *
+from threading import Thread
 
 from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
@@ -33,7 +35,6 @@ async def create_item(request: Request):
         info["host"] = client_host
         info["port"] = 5037
         res_list.append(info)
-
     logger.info(res_list)
     return res_list
 
@@ -43,6 +44,7 @@ async def run_task(request: Request, task: TaskEntity):
     client_host: str = request.client.host
     port = task.port
     serialno = task.serialno
+    package = task.package
     start_time = time.time()
     status = 0
     file_dir = os.path.join(BASE_CSV_DIR, str(int(start_time)))
@@ -53,27 +55,19 @@ async def run_task(request: Request, task: TaskEntity):
             Task.status != 2).count()
         if task_running_count > 0:
             raise Exception("当然仍有任务在进行无法创建新任务")
-        new_task = Task(host=client_host, port=port, serialno=serialno, start_time=start_time, status=status,
-                        file_dir=file_dir)
+        new_task = Task(host=client_host, port=port, serialno=serialno, start_time=datetime.datetime.now(), status=status, file_dir=file_dir, package=package)
         session.add(new_task)
-        pid = run_all_monitor()
+        session.commit()
+        run_all_monitor(serialno, [client_host, port], package, file_dir)
+        # new_task.pid = pid
+        # new_task.status = 1
+        # session.commit()
+    return {"code": 200}
 
 
-
-def run_all_monitor():
-    task_process = TaskHandle(serialno="E6E4C20629011168", server_addr=["10.130.131.80", "5039"],
-                              package="com.happyelements.AndroidAnimal", save_dir="localhost")
+def run_all_monitor(serialno, server_addr: list, package, save_dir):
+    task_process = TaskHandle(serialno=serialno, server_addr=server_addr, package=package, save_dir=save_dir)
     task_process.start()
-    return task_process.pid
-    # G.device = AndroidDevice()
-    # G.logcat = Logcat(package="com.road7.ddtdmxandroid.ld", save_dir="../core/")
-    # time.sleep(1)
-    # G.device.start_app()
-    # CpuMonitor("./cpu.txt").start()
-    # MemoryMonitor("./memory.txt").start()
-    # FPSMonitor("./FPS.txt").start()
-    # GpuMonitor("./gpu.txt").start()
-    # DeviceBatteryMonitor("./deviceBattery.txt").start()
 
 
 @func_set_timeout(5)
@@ -83,4 +77,5 @@ def adb_devices(adb):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

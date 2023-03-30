@@ -6,5 +6,5 @@ from pydantic import BaseModel
 
 class TaskEntity(BaseModel):
     serialno: str
-    platform: str
     port: int
+    package: str

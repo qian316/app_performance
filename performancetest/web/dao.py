@@ -38,6 +38,7 @@ class Task(Base):
     serialno = Column(String(255), default=None)
     status = Column(Integer)  # 0未开始, 1 执行中 , 2 执行完成 3.暂停
     file_dir = Column(String(255), default=None)  # 存储csv文件的路径
+    package = Column(String(255), default=None) #测试的app包名
     pid = Column(Integer)  # 当前任务运行的进程pid，任务执行的进程，里面有各个性能指标的线程
 
 #
