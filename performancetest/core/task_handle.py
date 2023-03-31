@@ -57,4 +57,5 @@ class TaskHandle(Process, Actuator):
 if __name__ == '__main__':
     task_process = TaskHandle(serialno="E6E4C20629011168", server_addr=["10.130.131.80", "5039"],
                               package="com.happyelements.AndroidAnimal", save_dir="localhost")
-    task_process.run()
+    task_process.start()
+    time.sleep(10)

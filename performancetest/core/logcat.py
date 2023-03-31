@@ -60,7 +60,7 @@ class Logcat(Monitor):
 
     # 结束任务
     def stop(self):
-        G.stop_event.clear()
+        self.stop_logcat()
 
     # 暂停任务
     def suspend(self):

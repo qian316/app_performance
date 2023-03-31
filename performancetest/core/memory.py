@@ -32,7 +32,7 @@ class MemoryMonitor(Monitor):
         self.interval = interval
 
     def get_mem_info(self):
-        if G.device.sdkversion > 25:
+        if G.device.sdkversion >= 25:
             mem_info = G.device.adb.raw_shell("top -n 1 -p {} -o RES -b -q".format(G.device.package_pid)).decode()
             mem_info = mem_info.strip()
             return mem_info
