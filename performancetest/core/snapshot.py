@@ -15,14 +15,14 @@ from core.base.monitor import Monitor
 # from func_timeout import func_set_timeout
 
 class SnapshotMonitor(Monitor):
-    def __init__(self, save_dir, serialno, host, port, interval=1, test_time=-1):
+    def __init__(self, save_dir, serialno, server_addr, interval=1, test_time=-1):
         super().__init__()
         self.save_dir = self.get_save_file(save_dir)
         self.interval = interval
-        self.device = Android(serialno, host=[host, port])
+        self.device = Android(serialno, host=server_addr)
 
     def get_save_file(self, save_dir):
-        save_dir = Path(save_dir).joinpath("img")
+        save_dir = Path(save_dir)
         if not save_dir.is_dir():
             save_dir.mkdir(parents=True, exist_ok=True)
         return save_dir

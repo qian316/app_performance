@@ -14,6 +14,7 @@ from core.fps import FPSMonitor
 from core.gpu import GpuMonitor
 from core.logcat import Logcat
 from core.memory import MemoryMonitor
+from core.snapshot import SnapshotMonitor
 
 
 class TaskHandle(Process, Actuator):
@@ -42,6 +43,7 @@ class TaskHandle(Process, Actuator):
         FPSMonitor(os.path.join(self.save_dir, "fps.csv")).start()
         GpuMonitor(os.path.join(self.save_dir, "gpu.csv")).start()
         DeviceBatteryMonitor(os.path.join(self.save_dir, "devicebattery.csv")).start()
+        SnapshotMonitor(os.path.join(self.save_dir, "picture_log"), self.serialno, self.server_addr).start()
         # signal.signal(signal.SIGUSR1, self.stop())
 
     def stop(self):

@@ -24,8 +24,10 @@ def start():
     GpuMonitor("./gpu.txt").start()
     DeviceBatteryMonitor("./deviceBattery.txt").start()
 
+
 def stop():
     G.stop_event.clear()
+
 
 if __name__ == '__main__':
     start()

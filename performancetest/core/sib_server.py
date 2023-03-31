@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 import traceback
+
 sib = "sib"
 if sys.platform == "win32":
     sib = "Windows_x86_64\sib.exe"
@@ -15,6 +16,7 @@ elif sys.platform == "darwin":
     else:
         print("x86 Architecture")
         sib = "Mac_x86_64/sib"
+
 
 class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
     sib_process = None
