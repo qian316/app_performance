@@ -26,19 +26,21 @@
 		.el-carousel__item:nth-child(2n+1) {
 		  background-color: #fff;
 		}
-		/* .el-carousel-item img {
-			width: 300px;
-			height: 200px;
-			object-fit: contain;
-			object-position: center;
-		} */
+		.sticky-header {
+			position: sticky;
+			top: 0;
+			z-index: 999;
+			margin-bottom: 1rem;
+			margin-top: 1rem;
+			/* 其他样式 */
+		}
 	</style>
 </head>
 <body>
 	<div id="app">
-		<div>
+		<div class="sticky-header">
 			<el-card>
-				<el-carousel type="card" height="16rem" :autoplay="false" :initial-index="parseInt(imgs.length/2)" :loop="false" :key="current_click_time_for_mountout">
+				<el-carousel type="card" height="16rem" :autoplay="false" :initial-index="parseInt(imgs.length/2)" :loop="false" arrow="never" indicator-position="none" :key="current_click_time_for_mountout">
 					<el-carousel-item v-for="item in imgs" :key="item.time" style="text-align: center;">
 					  <!-- <img :src="item.picture_path" alt="" style="object-fit: contain;"> -->
 					  <el-image
@@ -145,6 +147,12 @@
 				}
 			},
 			async mounted() {
+				this.$notify({
+					title: '使用提示',
+					dangerouslyUseHTMLString: true,
+					message: '1.点击图表，显示对应时间的图片<br/>2.点击前后图片,<strong>图表红线会自动切换到对应位置</strong>',
+					duration: 0
+				});
 				await this.getReportData()
 				this.clearNoDataType()
 				if (!this.allReportData.public_imgs || this.allReportData.public_imgs.length == 0 || this.allReportData.public_imgs.length == undefined) {
