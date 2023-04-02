@@ -1,4 +1,6 @@
 # coding=utf8
+import sys
+sys.path.append("../")
 import os
 import subprocess
 import threading

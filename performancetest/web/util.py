@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../")
 import concurrent.futures
 import os
 from builtins import *
@@ -87,7 +89,7 @@ class DataCollect(object):
         }
         """
         return cls.item_subtask_result(file_dir_path, monitortypes=args,
-                                       is_need_relative_time=kwargs.get("is_need_relative_time", False))
+                                       is_need_relative_time=kwargs.get("is_need_relative_time", True))
 
     # 读所有类型的数据的方法使用：DataCollect.read_data(1, "cpu", "memory", "fps")
     @classmethod

@@ -1,4 +1,6 @@
 # _*_ coding: utf-8 _*_
+import sys
+sys.path.append("../")
 from builtins import *
 from contextlib import contextmanager
 
@@ -42,6 +44,6 @@ class Task(Base):
     package = Column(String(255), default=None)  # 测试的app包名
     pid = Column(Integer)  # 当前任务运行的进程pid，任务执行的进程，里面有各个性能指标的线程
 
-#
-# if __name__ == '__main__':
-#     Base.metadata.create_all(engine)
+
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)

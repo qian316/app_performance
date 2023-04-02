@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>性能测试报告</title>
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+	<script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://unpkg.com/echarts/dist/echarts.min.js"></script>
+	<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+</head>
+<body>
+	<div id="app">
+		<div  class="chartdiv" >
+			<el-card>
+				<div :id="typeItem" style=" width: 100%;height: 18.75rem;" class="chartitem" v-for="typeItem in monitorTypes" :key="typeItem">
+				</div>
+			</el-card>
+		</div>
+	</div>
+
+	<script>
+		new Vue({
+			el: '#app',
+			data: function() {
+				return {
+					taskid: localStorage.getItem("taskid"),
+					loading:true,
+					slidesPerView: 5, //默认显示图片的张数
+					realmonitorTypes:[], //真实的需要展示的图标
+					isneedreportlog: false,
+					allReportData: {}, //所有的结果集，自己查
+					current_click_time_for_mountout: null, //被点击的时间00:00,所有的图标使用相同的时间。
+					current_click_time_for_mountout_time: null, //被点击的真实时间
+					monitorTypes:  ["cpu", "memory", "fps", "gpu", "devicebatterylevel", "devicebatterytemperature"],
+					chartsMap:{
+						//chats对象的数据集
+						// "cpu": null,
+						// "fps": null,
+						// "memory": null,
+						// "gpu": null,
+					},
+					chartOption:{
+						title: {
+						text: "",
+						textStyle:{
+							fontSize:24,
+						}
+						},
+						grid: {
+						left: '10%', // 左边距
+							right: '5%', // 右边距
+							top: '18%', // 上边距
+							bottom: '24%', // 下边距            
+						},
+						animation: false,
+						tooltip: {
+						trigger: "axis",
+						axisPointer: {
+							type: "shadow",
+						},
+						},
+						xAxis: {
+						data: null // x 坐标
+						},
+						yAxis: {
+						type: 'value',
+						axisLabel: {
+							formatter: '{value}'
+						},
+						},
+						toolbox: {
+						show: false,
+						},
+						brush: {
+						xAxisIndex: "all",
+						brushLink: "all",
+						brushStyle: {
+							borderWidth: 3,
+							color: 'rgba(255,36,36,0.2)',
+							borderColor: '#ff2424'
+						}
+						},
+						series: {
+						markArea:{},
+						type: "line",
+						clickable: true,
+						symbol: 'circle',
+						data: null, //y轴的值
+						lineStyle: {
+							width: 0.5,
+						},
+						showSymbol: false,//是否默认展示圆点
+						},
+					}
+				}
+			},
+			async mounted() {
+				await this.getReportData()
+				this.clearNoDataType()
+				if (!this.allReportData.public_imgs || this.allReportData.public_imgs.length == 0 || this.allReportData.public_imgs.length == undefined) {
+					return
+				}
+				this.current_click_time_for_mountout = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].relative_time : null
+				this.current_click_time_for_mountout_time = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].time : null
+				this.setAllBrush()
+			},
+			methods: {
+				async getReportData(){
+						await this.reportDataRecord().then(x=>{
+						this.allReportData = x.data.result
+						console.log("this.allReportData", this.allReportData)
+						this.monitorTypes.forEach(t=>{
+						try{
+							this.createChart(t)
+						}catch(e){
+							console.error(e)
+						}
+						})
+						this.addEvenClickForAllChart()
+					})
+				},
+				clearNoDataType(){
+					console.log("清除没有的图表")
+					let showPicName= []
+					let notShowPicName = []
+					this.monitorTypes.forEach(e=>{
+					if(this.allReportData[e]){
+						showPicName.push(e)
+					} else{
+						if(e === 'devicebatterylevel'){
+							notShowPicName.push('电量')
+						}else if(e === 'devicebatterytemperature'){
+							notShowPicName.push('温度')
+						}else{
+							notShowPicName.push(e)
+						}
+						
+					} 
+					})
+					this.monitorTypes = showPicName
+					if(notShowPicName.length > 0){
+					this.$message.error(notShowPicName.toString() + '暂无数据', 2000);
+					}
+				},
+				setBrushBytimereport(clicktime){
+				console.log("clicktime", clicktime)
+					this.allReportData.public_imgs.forEach(e=>{
+						if(e.time === clicktime){
+							this.current_click_time_for_mountout = e.relative_time
+							this.current_click_time_for_mountout_time = e.time
+						}
+					})
+					this.setAllBrush()
+				},
+				//根据点击点时间setbrush
+				setBrushBytime(clicktime){
+				// console.log("clicktime", clicktime)
+					this.allReportData.public_imgs.forEach(e=>{
+						if(e.time === clicktime){
+							this.current_click_time_for_mountout = e.relative_time
+							// this.current_click_time_for_mountout_time = e.time
+						}
+					})
+					this.setAllBrush()
+				},
+				//创建chart如果之前有chart就把之前的销毁
+				createChart(chartName){
+					let itemChart = this.chartsMap[chartName]
+					if (itemChart){
+						itemChart.dispose()
+					}
+					
+					let currentChartDiv = document.getElementById(chartName);
+					let nowChart = echarts.init(currentChartDiv);
+					this.chartsMap[chartName] = nowChart
+					this.setChartOptionRes(chartName, nowChart)
+					return nowChart
+				},
+				setChartOptionRes(chartName, nowChart){
+					this.chartOption.title.text = chartName.replace("devicebatterylevel", "电池电量")
+															.replace("devicebatterytemperature", "电池温度")
+															.replace("cpu","CPU")
+															.replace("memory","MEMORY")
+															.replace("gpu","GPU")
+															.replace("fps","FPS")
+					this.chartOption.xAxis.data = this.allReportData[chartName].relative_time
+					this.chartOption.series.data = this.allReportData[chartName].value
+					this.chartOption.xAxis.realtime = this.allReportData[chartName].time
+					this.chartOption.yAxis.axisLabel.formatter = '{value}' +  this.findunit(chartName)
+					nowChart.setOption(this.chartOption)
+					return nowChart
+				},
+				findunit(chartName){
+						const units = {
+						"cpu": "%", 
+						"gpu": "%",
+						"fps": "帧",
+						"memory": "M",
+						"devicebatterylevel": "%",
+						"devicebatterytemperature": "℃"
+					};
+					return units[chartName] || ""; // 如果没有找到对应的单位，返回一个空字符串
+				},
+				addEvenClickForAllChart(){
+				// console.log("addEvenClickForAllChart")
+					for(const key in this.chartsMap){
+						let myChart = this.chartsMap[key]
+						myChart.getZr().on("click", (params) => {
+						// console.log(params)
+						const pointInPixel = [params.offsetX, params.offsetY];
+						if (myChart.containPixel("grid", pointInPixel)) {
+							let xIndex = myChart.convertFromPixel({ seriesIndex: 0 }, [
+							params.offsetX,
+							params.offsetY,
+							])[0];
+							let current_key = this.allReportData[key].relative_time[xIndex];
+							this.current_click_time_for_mountout = current_key;
+							this.current_click_time_for_mountout_time = parseInt(this.allReportData[key].time[xIndex]); 
+							console.log(key, xIndex, this.allReportData[key].time[xIndex], "current_click_time_for_mountout_time")
+							this.setAllBrush()
+						}
+						});
+					}
+				},
+				setAllBrush(){
+					for(const key in this.chartsMap){
+						this.setBrush(this.chartsMap[key])
+					}
+				},
+				setBrush (myChart) {
+					myChart.dispatchAction({
+						type: "brush",
+						areas: [
+						{
+							brushType: "lineX",
+							coordRange: [
+							this.current_click_time_for_mountout,
+							this.current_click_time_for_mountout,
+							],
+							xAxisIndex: 0,
+							transformable: false,
+						},
+						],
+					});
+					// this.$router.push({ query: { ...this.$route.query, currenttimeparam: this.current_click_time_for_mountout } })
+					if(this.allReportData.public_imgs){
+						let itemImgInstance = null
+						for(let i = 0; i < this.allReportData.public_imgs.length; i++){
+						if(this.allReportData.public_imgs[i].relative_time === this.current_click_time_for_mountout){
+							itemImgInstance = this.allReportData.public_imgs[i]
+							break
+						}
+						}
+						// console.log(itemImgInstance, "itemImgInstance")
+						if (itemImgInstance){
+
+						// this.loadImgwidthHeight(itemImgInstance.picture_path).then(console.log(this.slidesPerView, "this.slidesPerView"))
+						// console.log(this.slidesPerView, "slidesPerView")
+						}
+					}
+				},
+				async loadImgwidthHeight(picture_path) {
+					const img = new Image();
+					img.src = picture_path;
+
+					await new Promise((resolve, reject) => {
+					img.onload = () => {
+						const width = img.width;
+						const height = img.height;
+						const aspectRatio = width / height;
+						// console.log("width", img.width, img.height)
+						// 比较宽高比
+						if (aspectRatio > 1) {
+						this.slidesPerView = 5;
+						} else if (aspectRatio < 1) {
+						// console.log("aspectRatio", aspectRatio);
+						this.slidesPerView = 7;
+						} else {
+						this.slidesPerView = 5;
+						}
+
+						resolve();
+					};
+
+					img.onerror = () => {
+						reject();
+					};
+					});
+				},
+				async reportDataRecord(){
+					const res = await axios({method: 'get',//提交方法
+							url: '/result/',//提交地址
+							params: {"id": this.taskid}
+						}) 
+					return res
+				},
+			}
+		})
+	</script>
+</body>
+</html>

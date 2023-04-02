@@ -4,14 +4,14 @@ import os
 import time
 import traceback
 from builtins import *
-
 import psutil
 from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
 from func_timeout import func_set_timeout, FunctionTimedOut
 from starlette.responses import JSONResponse
 from starlette.staticfiles import StaticFiles
-
+import sys
+sys.path.append("../")
 from performancetest.core.global_data import logger
 from performancetest.core.task_handle import TaskHandle
 from performancetest.web.dao import connect, Task
@@ -49,7 +49,7 @@ async def run_task(request: Request, task: TaskEntity):
     package = task.package
     start_time = time.time()
     status = 0
-    file_dir = os.path.join(BASE_CSV_DIR, str(int(start_time)))
+    file_dir = os.path.join(BASE_CSV_DIR, client_host, str(int(start_time)))
     if not os.path.exists(file_dir):
         os.makedirs(file_dir)
     return_task_id = None

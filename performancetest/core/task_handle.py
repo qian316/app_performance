@@ -1,4 +1,6 @@
 # _*_ coding: utf-8 _*_
+import sys
+sys.path.append("../")
 import os
 import time
 from builtins import *
@@ -60,8 +62,6 @@ class TaskHandle(Process, Actuator):
     def suspend(self):
         G.suspend_event.clear()
 
-    def handle_signal(self, signum, frame):
-        print(f"{self.name} received {self.sig_name} signal")
 
 
 if __name__ == '__main__':
