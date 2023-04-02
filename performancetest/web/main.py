@@ -8,7 +8,7 @@ import psutil
 from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
 from func_timeout import func_set_timeout, FunctionTimedOut
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse
 from starlette.staticfiles import StaticFiles
 import sys
 sys.path.append("../")
@@ -23,6 +23,10 @@ BASE_CSV_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file
 BASE_SDK_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], "sdk")
 app.mount("/static", StaticFiles(directory=BASE_CSV_DIR), name="static")
 app.mount("/sdk", StaticFiles(directory=BASE_SDK_DIR), name="sdk")
+
+@app.get("/")
+async def index():
+    return RedirectResponse(url="/static/index.html")
 
 @app.get("/get_local_device/")
 async def create_item(request: Request):

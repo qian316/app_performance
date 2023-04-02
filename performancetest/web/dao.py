@@ -45,5 +45,5 @@ class Task(Base):
     pid = Column(Integer)  # 当前任务运行的进程pid，任务执行的进程，里面有各个性能指标的线程
 
 
-if __name__ == '__main__':
-    Base.metadata.create_all(engine)
+# if __name__ == '__main__':
+#     Base.metadata.create_all(engine)
