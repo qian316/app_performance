@@ -1,18 +1,21 @@
 # _*_ coding: utf-8 _*_
-import collections
 import datetime
 import os
 import time
+import traceback
 from builtins import *
 
+import psutil
 from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
 from func_timeout import func_set_timeout, FunctionTimedOut
+from starlette.responses import JSONResponse
 
-from core.global_data import logger
-from core.task_handle import TaskHandle
-from web.dao import connect, Task
-from web.entity import TaskEntity
+from performancetest.core.global_data import logger
+from performancetest.core.task_handle import TaskHandle
+from performancetest.web.dao import connect, Task
+from performancetest.web.entity import TaskEntity
+from performancetest.web.util import DataCollect
 
 app = FastAPI()
 BASE_CSV_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], "test_result")
@@ -48,6 +51,7 @@ async def run_task(request: Request, task: TaskEntity):
     file_dir = os.path.join(BASE_CSV_DIR, str(int(start_time)))
     if not os.path.exists(file_dir):
         os.makedirs(file_dir)
+    return_task_id = None
     with connect() as session:
         task_running_count = session.query(Task).filter(Task.host == client_host).filter(Task.port == port).filter(
             Task.status != 2).count()
@@ -58,15 +62,38 @@ async def run_task(request: Request, task: TaskEntity):
         session.add(new_task)
         session.commit()
         run_all_monitor(serialno, [client_host, port], package, file_dir)
-        # new_task.pid = pid
-        # new_task.status = 1
-        # session.commit()
-    return {"code": 200}
+        return_task_id = new_task.id
+    return JSONResponse(content={"code": 200, "taskid": return_task_id})
 
 
 def run_all_monitor(serialno, server_addr: list, package, save_dir):
     task_process = TaskHandle(serialno=serialno, server_addr=server_addr, package=package, save_dir=save_dir)
     task_process.start()
+
+
+@app.get("/stop_task/")
+async def stop_task(request: Request, id: int):
+    client_host: str = request.client.host
+    with connect() as session:
+        task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
+        try:
+            proc = psutil.Process(task_item.pid)
+            proc.kill()
+        except Exception as e:
+            logger.error(e)
+            traceback.print_exc()
+        task_item.status = 2
+        task_item.end_time = datetime.datetime.now()
+    return JSONResponse(content={"code": 200})
+
+
+@app.get("/result/")
+async def run_task(request: Request, id: int):
+    client_host: str = request.client.host
+    with connect() as session:
+        task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
+        result = DataCollect.read_data_all(task_item.file_dir)
+        return JSONResponse(content={"result": result})
 
 
 @func_set_timeout(5)

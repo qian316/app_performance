@@ -6,8 +6,8 @@ import time
 import traceback
 from builtins import *
 
-from core.global_data import GlobalData as G, logger
-from core.base.monitor import Monitor
+from performancetest.core.base.monitor import Monitor
+from performancetest.core.global_data import GlobalData as G, logger
 
 
 class ParseGpuinfo(object):

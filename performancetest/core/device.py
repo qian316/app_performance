@@ -5,7 +5,7 @@ from builtins import *
 
 from func_timeout import func_set_timeout
 
-from core.command import ADB
+from performancetest.core.command import ADB
 
 # , Tidevice
 

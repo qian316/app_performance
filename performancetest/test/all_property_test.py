@@ -1,12 +1,11 @@
 # _*_ coding: utf-8 _*_
 import time
-from builtins import *
 
 from performancetest.core.cpu import CpuMonitor
 from performancetest.core.device import AndroidDevice
-from performancetest.core.global_data import GlobalData as G
 from performancetest.core.devicebattery import DeviceBatteryMonitor
 from performancetest.core.fps import FPSMonitor
+from performancetest.core.global_data import GlobalData as G
 from performancetest.core.gpu import GpuMonitor
 from performancetest.core.logcat import Logcat
 from performancetest.core.memory import MemoryMonitor

@@ -1,20 +1,22 @@
 # _*_ coding: utf-8 _*_
 import os
-import signal
 import time
 from builtins import *
 from multiprocessing import Process
 
-from core.global_data import GlobalData as G
-from core.base.actuator import Actuator
-from core.cpu import CpuMonitor
-from core.device import AndroidDevice
-from core.devicebattery import DeviceBatteryMonitor
-from core.fps import FPSMonitor
-from core.gpu import GpuMonitor
-from core.logcat import Logcat
-from core.memory import MemoryMonitor
-from core.snapshot import SnapshotMonitor
+from sqlalchemy import desc
+
+from performancetest.core.base.actuator import Actuator
+from performancetest.core.cpu import CpuMonitor
+from performancetest.core.device import AndroidDevice
+from performancetest.core.devicebattery import DeviceBatteryMonitor
+from performancetest.core.fps import FPSMonitor
+from performancetest.core.global_data import GlobalData as G
+from performancetest.core.gpu import GpuMonitor
+from performancetest.core.logcat import Logcat
+from performancetest.core.memory import MemoryMonitor
+from performancetest.core.snapshot import SnapshotMonitor
+from performancetest.web.dao import connect, Task
 
 
 class TaskHandle(Process, Actuator):
@@ -28,11 +30,18 @@ class TaskHandle(Process, Actuator):
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
         self.daemon = True
+        # signal.signal(signal.SIGTERM, self.stop())
+        # signal.signal(signal.SIGINT, self.stop())
 
     def start(self):
         super().start()
 
     def run(self):
+        with connect() as session:
+            current_task_running = session.query(Task).filter(Task.host == self.server_addr[0]).filter(
+                Task.port == self.server_addr[1]).filter(Task.status == 0).order_by(desc(Task.start_time)).first()
+            current_task_running.status = 1
+            current_task_running.pid = self.pid
         G.device = AndroidDevice(serialno=self.serialno, server_addr=self.server_addr,
                                  package=self.package, save_dir=self.save_dir)
         G.device.start_app()
@@ -44,7 +53,6 @@ class TaskHandle(Process, Actuator):
         GpuMonitor(os.path.join(self.save_dir, "gpu.csv")).start()
         DeviceBatteryMonitor(os.path.join(self.save_dir, "devicebattery.csv")).start()
         SnapshotMonitor(os.path.join(self.save_dir, "picture_log"), self.serialno, self.server_addr).start()
-        # signal.signal(signal.SIGUSR1, self.stop())
 
     def stop(self):
         G.stop_event.clear()

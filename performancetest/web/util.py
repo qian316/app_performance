@@ -1,9 +1,10 @@
 import concurrent.futures
 import os
+from builtins import *
 
 import numpy as np
 
-from core.global_data import logger
+from performancetest.core.global_data import logger
 
 
 class DataCollect(object):
@@ -222,6 +223,7 @@ class DataCollect(object):
         minutes = str(time_data_collect // 60).zfill(2)
         seconds = str(time_data_collect % 60).zfill(2)
         return f"{minutes}:{seconds}"
+
 
 if __name__ == '__main__':
     d = DataCollect.read_data_all(r"C:\workproject\app_performance\performancetest\test_result\1680241056")
