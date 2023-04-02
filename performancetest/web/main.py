@@ -10,6 +10,7 @@ from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
 from func_timeout import func_set_timeout, FunctionTimedOut
 from starlette.responses import JSONResponse
+from starlette.staticfiles import StaticFiles
 
 from performancetest.core.global_data import logger
 from performancetest.core.task_handle import TaskHandle
@@ -19,7 +20,7 @@ from performancetest.web.util import DataCollect
 
 app = FastAPI()
 BASE_CSV_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], "test_result")
-
+app.mount("/static", StaticFiles(directory=BASE_CSV_DIR), name="static")
 
 @app.get("/get_local_device/")
 async def create_item(request: Request):
