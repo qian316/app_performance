@@ -124,7 +124,7 @@ class DataCollect(object):
                     item_subtask_result_dict.pop(key, None)
 
             # 处理公共开始时间, 结束时间
-            logger.info("item{0}".format(item_subtask_result_dict))
+            # logger.info("item{0}".format(item_subtask_result_dict))
             if item_subtask_result_dict:
                 public_start_time, public_end_time = cls.get_public_time(item_subtask_result_dict)
                 # 获取所有结果
