@@ -1,5 +1,6 @@
 # _*_ coding: utf-8 _*_
 import sys
+
 sys.path.append("../")
 import os
 import time
@@ -61,7 +62,6 @@ class TaskHandle(Process, Actuator):
 
     def suspend(self):
         G.suspend_event.clear()
-
 
 
 if __name__ == '__main__':

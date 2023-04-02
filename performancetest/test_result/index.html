@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>性能测试报告</title>
-	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-	<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
-	<script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
-	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
-	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-	<script src="https://unpkg.com/echarts/dist/echarts.min.js"></script>
-	<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-	<style>
+    <meta charset="UTF-8">
+    <title>性能测试报告</title>
+    <link href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" rel="stylesheet">
+    <link href="https://unpkg.com/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/echarts/dist/echarts.min.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <style>
 		.el-carousel__item h3 {
 		  color: #475669;
 		  font-size: 14px;
@@ -34,42 +34,45 @@
 			margin-top: 1rem;
 			/* 其他样式 */
 		}
-	</style>
+
+    </style>
 </head>
 <body>
-	<div id="app">
-		<div class="sticky-header">
-			<el-card>
-				<el-carousel type="card" height="16rem" :autoplay="false" :initial-index="parseInt(imgs.length/2)" :loop="false" arrow="never" indicator-position="none" :key="current_click_time_for_mountout">
-					<el-carousel-item v-for="item in imgs" :key="item.time" style="text-align: center;">
-					  <!-- <img :src="item.picture_path" alt="" style="object-fit: contain;"> -->
-					  <el-image
-						style="height: 100%;"
-						:src="item.picture_path"
-						fit="cover" 
-						:preview-src-list="item.relative_time == current_click_time_for_mountout ? [item.picture_path]: []"
-						@click="clickImg(item)"
-						>
-						<div slot="error" class="image-slot" style="text-align: center;">
-							暂无图片
-							<i class="el-icon-picture-outline"></i>
-						  </div>
-					</el-image>
-					</el-carousel-item>
-				  </el-carousel>
-			</el-card>
-			
-		</div>
-		<br/>
-		<div  class="chartdiv" >
-			<el-card>
-				<div :id="typeItem" style=" width: 100%;height: 18.75rem;" class="chartitem" v-for="typeItem in monitorTypes" :key="typeItem">
-				</div>
-			</el-card>
-		</div>
-	</div>
+<div id="app">
+    <div class="sticky-header">
+        <el-card>
+            <el-carousel :autoplay="false" :initial-index="parseInt(imgs.length/2)" :key="current_click_time_for_mountout" :loop="false"
+                         arrow="never" height="16rem" indicator-position="none" type="card">
+                <el-carousel-item :key="item.time" style="text-align: center;" v-for="item in imgs">
+                    <!-- <img :src="item.picture_path" alt="" style="object-fit: contain;"> -->
+                    <el-image
+                            :preview-src-list="item.relative_time == current_click_time_for_mountout ? [item.picture_path]: []"
+                            :src="item.picture_path"
+                            @click="clickImg(item)"
+                            fit="cover"
+                            style="height: 100%;"
+                    >
+                        <div class="image-slot" slot="error" style="text-align: center;">
+                            暂无图片
+                            <i class="el-icon-picture-outline"></i>
+                        </div>
+                    </el-image>
+                </el-carousel-item>
+            </el-carousel>
+        </el-card>
 
-	<script>
+    </div>
+    <br/>
+    <div class="chartdiv">
+        <el-card>
+            <div :id="typeItem" :key="typeItem" class="chartitem"
+                 style=" width: 100%;height: 18.75rem;" v-for="typeItem in monitorTypes">
+            </div>
+        </el-card>
+    </div>
+</div>
+
+<script>
 		new Vue({
 			el: '#app',
 			data: function() {
@@ -359,6 +362,7 @@
 				},
 			}
 		})
-	</script>
+
+</script>
 </body>
 </html>

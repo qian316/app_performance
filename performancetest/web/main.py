@@ -1,16 +1,18 @@
 # _*_ coding: utf-8 _*_
 import datetime
 import os
+import sys
 import time
 import traceback
 from builtins import *
+
 import psutil
 from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
 from func_timeout import func_set_timeout, FunctionTimedOut
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette.staticfiles import StaticFiles
-import sys
+
 sys.path.append("../")
 from performancetest.core.global_data import logger
 from performancetest.core.task_handle import TaskHandle
@@ -24,9 +26,11 @@ BASE_SDK_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file
 app.mount("/static", StaticFiles(directory=BASE_CSV_DIR), name="static")
 app.mount("/sdk", StaticFiles(directory=BASE_SDK_DIR), name="sdk")
 
+
 @app.get("/")
 async def index():
     return RedirectResponse(url="/static/index.html")
+
 
 @app.get("/get_local_device/")
 async def create_item(request: Request):
@@ -45,6 +49,15 @@ async def create_item(request: Request):
         res_list.append(info)
     logger.info(res_list)
     return res_list
+
+
+@app.get("/get_all_task/")
+async def get_all_task(request: Request):
+    client_host: str = request.client.host
+    with connect() as session:
+        all_task = session.query(Task).filter(Task.host == client_host).all()
+        res = [i.to_dict() for i in all_task]
+        return res
 
 
 @app.post("/run_task/")
