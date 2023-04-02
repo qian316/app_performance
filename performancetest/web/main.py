@@ -20,7 +20,9 @@ from performancetest.web.util import DataCollect
 
 app = FastAPI()
 BASE_CSV_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], "test_result")
+BASE_SDK_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], "sdk")
 app.mount("/static", StaticFiles(directory=BASE_CSV_DIR), name="static")
+app.mount("/sdk", StaticFiles(directory=BASE_SDK_DIR), name="sdk")
 
 @app.get("/get_local_device/")
 async def create_item(request: Request):

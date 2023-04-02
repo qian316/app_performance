@@ -140,18 +140,19 @@ class DataCollect(object):
                 img_path_dir = os.path.join(file_dir_path, "picture_log")
                 if os.path.exists(img_path_dir):
                     task_dir, task_name_int = os.path.split(file_dir_path)
+                    _, host = os.path.split(task_dir)
                     item_subtask_result_dict["public_imgs"] = cls.get_public_imgs(img_path_dir, public_start_time,
-                                                                                  public_end_time, task_name_int)
+                                                                                  public_end_time, task_name_int, host)
         return item_subtask_result_dict
 
     @staticmethod
-    def get_public_imgs(img_path_dir: str, public_start_time: int, public_end_time: int, task_name_int:str):
+    def get_public_imgs(img_path_dir: str, public_start_time: int, public_end_time: int, task_name_int:str, host:str):
         all_imgs = os.listdir(img_path_dir)
         img_time_dict = {i: "" for i in range(public_start_time, public_end_time + 1)}
         for img in all_imgs:
             try:
                 img_time_dict[int(int(
-                    img.replace(".jpg", "")) * 0.001)] = "/static/{0}/picture_log/{1}".format(task_name_int, img)
+                    img.replace(".jpg", "")) * 0.001)] = "/static/{0}/{1}/picture_log/{2}".format(host, task_name_int, img)
             except Exception as e:
                 logger.error(e)
         res_list = []
