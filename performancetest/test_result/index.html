@@ -58,84 +58,102 @@
 </head>
 <body>
 <div id="app">
-  <div class="task">
-    <el-card>
-      <el-steps :active="3" finish-status="success">
-        <el-step title="选择设备"></el-step>
-        <el-step title="开始任务"></el-step>
-        <el-step title="查看报告"></el-step>
-      </el-steps>
-        可选设备（下载启动sdk后，系统会自动获取你的电脑上连接的设备）：
-        <br/>
-          <el-radio-group v-model="selectediphone" @change="get_local_device_packages">
-            <el-radio :label="phone.serialno" v-for="phone in phoneList" :key="phone.serialno">
-              <div class="phone-card">
-                <img src="iphone.png" class="phone-img" />
-                <div class="phone-details">
-                  <div class="phone-name">{{ phone.manufacturer }} {{ phone.model }}</div>
-                  <div class="phone-info">
-                    <span>Platform: {{ phone.platform }}</span>
-                    <span>Memory: {{ phone.memory }}</span>
-                    <span>Storage: {{ phone.storage }}</span>
-                  </div>
-                </div>
-              </div>
-            </el-radio>
-          </el-radio-group>
-    </el-card>
-    <br/>
-    <el-card>
-      <div>
-          选择app：
-          <el-select v-model="package" placeholder="请选择" @change="get_local_device_packages_version">
-            <el-option
-              v-for="item in packages"
-              :key="item"
-              :label="item"
-              :value="item">
-            </el-option>
-          </el-select>
-          版本号： {{version}}
-          
-          <el-button type="success">开始任务</el-button>
-          <el-button type="danger">停止任务</el-button>
-      </div>
-      
-    </el-card>
-  </div>
-  <div class="report">
-    <div class="sticky-header">
-        <el-card>
-            <el-carousel :autoplay="false" :initial-index="parseInt(imgs.length/2)" :key="current_click_time_for_mountout" :loop="false"
-                         arrow="never" height="16rem" indicator-position="none" type="card">
-                <el-carousel-item :key="item.time" style="text-align: center;" v-for="item in imgs">
-                    <!-- <img :src="item.picture_path" alt="" style="object-fit: contain;"> -->
-                    <el-image
-                            :preview-src-list="item.relative_time == current_click_time_for_mountout ? [item.picture_path]: []"
-                            :src="item.picture_path"
-                            @click="clickImg(item)"
-                            fit="cover"
-                            style="height: 100%;"
-                    >
-                        <div class="image-slot" slot="error" style="text-align: center;">
-                            暂无图片
-                            <i class="el-icon-picture-outline"></i>
-                        </div>
-                    </el-image>
-                </el-carousel-item>
-            </el-carousel>
-        </el-card>
+  <el-container>
+    <el-aside width="200px" style="text-align: center;">
+      <el-card >任务列表</el-card>
+      <el-menu default-active="1" class="el-menu-vertical-demo">
+        <div>
+          <el-menu-item index="1" >选项1</el-menu-item>
+        </div>
+      </el-menu>
 
-    </div>
-    <br/>
-    <div class="chartdiv">
-        <el-card>
-            <div :id="typeItem" :key="typeItem" class="chartitem"
-                 style=" width: 100%;height: 18.75rem;" v-for="typeItem in monitorTypes">
+
+    </el-aside>
+    <el-container>
+      <el-main>
+        <div class="task">
+          <el-card>
+            <el-steps :active="3" finish-status="success">
+              <el-step title="选择设备"></el-step>
+              <el-step title="开始任务"></el-step>
+              <el-step title="查看报告"></el-step>
+            </el-steps>
+              可选设备（下载启动sdk后，系统会自动获取你的电脑上连接的设备）：
+              <br/>
+                <el-radio-group v-model="selectediphone" @change="get_local_device_packages">
+                  <el-radio :label="phone.serialno" v-for="phone in phoneList" :key="phone.serialno">
+                    <div class="phone-card">
+                      <img src="iphone.png" class="phone-img" />
+                      <div class="phone-details">
+                        <div class="phone-name">{{ phone.manufacturer }} {{ phone.model }}</div>
+                        <div class="phone-info">
+                          <span>Platform: {{ phone.platform }}</span>
+                          <span>Memory: {{ phone.memory }}</span>
+                          <span>Storage: {{ phone.storage }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </el-radio>
+                </el-radio-group>
+          </el-card>
+          <br/>
+          <el-card>
+            <div>
+                选择app：
+                <el-select v-model="package" placeholder="请选择" @change="get_local_device_packages_version">
+                  <el-option
+                    v-for="item in packages"
+                    :key="item"
+                    :label="item"
+                    :value="item">
+                  </el-option>
+                </el-select>
+                版本号： {{version}}
+                <div style="float: right;">
+                  <el-button type="success" >开始任务</el-button>
+                  <el-button type="danger" >停止任务</el-button>
+                </div>
+                
             </div>
-        </el-card>
-    </div>
-  </div>
+            
+          </el-card>
+        </div>
+        <div class="report">
+          <div class="sticky-header">
+              <el-card>
+                  <el-carousel :autoplay="false" :initial-index="parseInt(imgs.length/2)" :key="current_click_time_for_mountout" :loop="false"
+                               arrow="never" height="16rem" indicator-position="none" type="card">
+                      <el-carousel-item :key="item.time" style="text-align: center;" v-for="item in imgs">
+                          <!-- <img :src="item.picture_path" alt="" style="object-fit: contain;"> -->
+                          <el-image
+                                  :preview-src-list="item.relative_time == current_click_time_for_mountout ? [item.picture_path]: []"
+                                  :src="item.picture_path"
+                                  @click="clickImg(item)"
+                                  fit="cover"
+                                  style="height: 100%;"
+                          >
+                              <div class="image-slot" slot="error" style="text-align: center;">
+                                  暂无图片
+                                  <i class="el-icon-picture-outline"></i>
+                              </div>
+                          </el-image>
+                      </el-carousel-item>
+                  </el-carousel>
+              </el-card>
+      
+          </div>
+          <br/>
+          <div class="chartdiv">
+              <el-card>
+                  <div :id="typeItem" :key="typeItem" class="chartitem"
+                       style=" width: 100%;height: 18.75rem;" v-for="typeItem in monitorTypes">
+                  </div>
+              </el-card>
+          </div>
+        </div>
+      </el-main>
+    </el-container>
+  </el-container>
 </div>
 
 <script>
