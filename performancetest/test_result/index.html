@@ -34,11 +34,76 @@
 			margin-top: 1rem;
 			/* 其他样式 */
 		}
-
+    .phone-card {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .phone-img {
+      width: 100px;
+      height: 100px;
+      margin-right: 20px;
+      border-radius: 5px;
+    }
+    .phone-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .phone-info {
+      font-size: 14px;
+      color: #666;
+    }
     </style>
 </head>
 <body>
 <div id="app">
+  <div class="task">
+    <el-card>
+      <el-steps :active="3" finish-status="success">
+        <el-step title="选择设备"></el-step>
+        <el-step title="开始任务"></el-step>
+        <el-step title="查看报告"></el-step>
+      </el-steps>
+        可选设备（下载启动sdk后，系统会自动获取你的电脑上连接的设备）：
+        <br/>
+          <el-radio-group v-model="selectediphone" @change="get_local_device_packages">
+            <el-radio :label="phone.serialno" v-for="phone in phoneList" :key="phone.serialno">
+              <div class="phone-card">
+                <img src="iphone.png" class="phone-img" />
+                <div class="phone-details">
+                  <div class="phone-name">{{ phone.manufacturer }} {{ phone.model }}</div>
+                  <div class="phone-info">
+                    <span>Platform: {{ phone.platform }}</span>
+                    <span>Memory: {{ phone.memory }}</span>
+                    <span>Storage: {{ phone.storage }}</span>
+                  </div>
+                </div>
+              </div>
+            </el-radio>
+          </el-radio-group>
+    </el-card>
+    <br/>
+    <el-card>
+      <div>
+          选择app：
+          <el-select v-model="package" placeholder="请选择" @change="get_local_device_packages_version">
+            <el-option
+              v-for="item in packages"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
+          版本号： {{version}}
+          
+          <el-button type="success">开始任务</el-button>
+          <el-button type="danger">停止任务</el-button>
+      </div>
+      
+    </el-card>
+  </div>
+  <div class="report">
     <div class="sticky-header">
         <el-card>
             <el-carousel :autoplay="false" :initial-index="parseInt(imgs.length/2)" :key="current_click_time_for_mountout" :loop="false"
@@ -70,6 +135,7 @@
             </div>
         </el-card>
     </div>
+  </div>
 </div>
 
 <script>
@@ -77,7 +143,15 @@
 			el: '#app',
 			data: function() {
 				return {
-					imgs:[], //展示图片的容器
+          version:"",
+          packages: [],
+          package: "",
+          selectediphone: null,
+          phoneList: [
+            
+          ],
+//////////////////////////////////////////////////////////// 上面是任务，下面是报告
+          imgs:[], //展示图片的容器
 					taskid: localStorage.getItem("taskid"),
 					loading:true,
 					slidesPerView: 5, //默认显示图片的张数
@@ -164,6 +238,7 @@
 				this.current_click_time_for_mountout = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].relative_time : null
 				this.current_click_time_for_mountout_time = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].time : null
 				this.setAllBrush()
+        this.get_local_device()
 			},
 			methods: {
 				async getReportData(){
@@ -360,6 +435,29 @@
 						}) 
 					return res
 				},
+        async get_local_device(){
+          const res = await axios({method: 'get',//提交方法
+							url: '/get_local_device/'//提交地址
+					}) 
+          console.log(res)
+          this.phoneList = res.data
+        },
+        async get_local_device_packages(){
+          const res = await axios({method: 'post',//提交方法
+							url: '/get_local_device_packages/',//提交地址
+              data: {"serialno": this.selectediphone} //data
+					}) 
+          console.log(res)
+          this.packages = res.data
+        },
+        async get_local_device_packages_version(){
+          const res = await axios({method: 'post',//提交方法
+							url: '/get_local_device_packages_version/',//提交地址
+              data: {"serialno": this.selectediphone, "package": this.package} //data
+					}) 
+          console.log(res)
+          this.version = res.data
+        }
 			}
 		})
 

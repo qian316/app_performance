@@ -1,6 +1,7 @@
 # _*_ coding: utf-8 _*_
 import datetime
 import os
+import re
 import sys
 import time
 import traceback
@@ -10,14 +11,14 @@ import psutil
 from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
 from func_timeout import func_set_timeout, FunctionTimedOut
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import RedirectResponse
 from starlette.staticfiles import StaticFiles
 
 sys.path.append("../")
 from performancetest.core.global_data import logger
 from performancetest.core.task_handle import TaskHandle
 from performancetest.web.dao import connect, Task
-from performancetest.web.entity import TaskEntity
+from performancetest.web.entity import DeviceEntity, PackageEntity, TaskEntity
 from performancetest.web.util import DataCollect
 
 app = FastAPI()
@@ -49,6 +50,30 @@ async def create_item(request: Request):
         res_list.append(info)
     logger.info(res_list)
     return res_list
+
+
+@app.post("/get_local_device_packages/")
+async def get_local_device_packages(request: Request, device: DeviceEntity):
+    client_host: str = request.client.host
+    try:
+        adb: ADB = ADB(server_addr=(client_host, 5037), serialno=device.serialno)
+        app_list : list = adb_app_list(adb)
+    except FunctionTimedOut as e:
+        return []
+    logger.info(app_list)
+    return app_list
+
+@app.post("/get_local_device_packages_version/")
+async def get_local_device_packages_version(request: Request, package: PackageEntity):
+    client_host: str = request.client.host
+    adb: ADB = ADB(server_addr=(client_host, 5037), serialno=package.serialno)
+    package_info = adb.shell(['dumpsys', 'package', package.package])
+    matcher = re.search(r'versionName=(.*)', package_info)
+    if matcher:
+        version=matcher.group(1)
+    else:
+        version=''
+    return version
 
 
 @app.get("/get_all_task/")
@@ -83,7 +108,7 @@ async def run_task(request: Request, task: TaskEntity):
         session.commit()
         run_all_monitor(serialno, [client_host, port], package, file_dir)
         return_task_id = new_task.id
-    return JSONResponse(content={"code": 200, "taskid": return_task_id})
+    return {"code": 200, "taskid": return_task_id}
 
 
 def run_all_monitor(serialno, server_addr: list, package, save_dir):
@@ -104,7 +129,7 @@ async def stop_task(request: Request, id: int):
             traceback.print_exc()
         task_item.status = 2
         task_item.end_time = datetime.datetime.now()
-    return JSONResponse(content={"code": 200})
+    return {"code": 200}
 
 
 @app.get("/result/")
@@ -113,12 +138,18 @@ async def run_task(request: Request, id: int):
     with connect() as session:
         task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
         result = DataCollect.read_data_all(task_item.file_dir)
-        return JSONResponse(content={"result": result})
+        return {"result": result}
 
 
-@func_set_timeout(5)
+@func_set_timeout(30)
 def adb_devices(adb):
     return adb.devices()
+
+
+@func_set_timeout(30)
+def adb_app_list(adb):
+    return adb.list_app(third_only=True)
+    
 
 
 if __name__ == "__main__":
