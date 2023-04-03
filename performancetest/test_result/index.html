@@ -62,8 +62,8 @@
     <el-aside width="200px" style="text-align: center;">
       <el-card >任务列表</el-card>
       <el-menu default-active="1" class="el-menu-vertical-demo">
-        <div>
-          <el-menu-item index="1" >选项1</el-menu-item>
+        <div v-for="item,index in tasklist" :key="item">
+          <el-menu-item index="1" >{{item.start_time}}</el-menu-item>
         </div>
       </el-menu>
 
@@ -161,6 +161,7 @@
 			el: '#app',
 			data: function() {
 				return {
+          tasklist:[],
           version:"",
           packages: [],
           package: "",
@@ -256,6 +257,7 @@
 				this.current_click_time_for_mountout = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].relative_time : null
 				this.current_click_time_for_mountout_time = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].time : null
 				this.setAllBrush()
+        this.get_all_task()
         this.get_local_device()
 			},
 			methods: {
@@ -475,6 +477,13 @@
 					}) 
           console.log(res)
           this.version = res.data
+        },
+        async get_all_task(){
+          const res = await axios({method: 'get',//提交方法
+							url: '/get_all_task/',//提交地址
+					}) 
+          console.log(res)
+          this.tasklist = res.data
         }
 			}
 		})
