@@ -11,7 +11,7 @@ import psutil
 from airtest.core.android.adb import ADB
 from fastapi import FastAPI, Request
 from func_timeout import func_set_timeout, FunctionTimedOut
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, JSONResponse
 from starlette.staticfiles import StaticFiles
 
 sys.path.append("../")
@@ -26,6 +26,23 @@ BASE_CSV_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file
 BASE_SDK_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], "sdk")
 app.mount("/static", StaticFiles(directory=BASE_CSV_DIR), name="static")
 app.mount("/sdk", StaticFiles(directory=BASE_SDK_DIR), name="sdk")
+
+
+# 定义异常处理程序
+@app.exception_handler(Exception)
+async def exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        content={"code": "500", "err": exc.args},
+    )
+
+
+# 中间件函数
+@app.middleware("http")
+async def handle_exceptions(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except BaseException as exc:
+        return await exception_handler(request, exc)
 
 
 @app.get("/")
@@ -57,11 +74,12 @@ async def get_local_device_packages(request: Request, device: DeviceEntity):
     client_host: str = request.client.host
     try:
         adb: ADB = ADB(server_addr=(client_host, 5037), serialno=device.serialno)
-        app_list : list = adb_app_list(adb)
+        app_list: list = adb_app_list(adb)
     except FunctionTimedOut as e:
         return []
     logger.info(app_list)
     return app_list
+
 
 @app.post("/get_local_device_packages_version/")
 async def get_local_device_packages_version(request: Request, package: PackageEntity):
@@ -70,9 +88,9 @@ async def get_local_device_packages_version(request: Request, package: PackageEn
     package_info = adb.shell(['dumpsys', 'package', package.package])
     matcher = re.search(r'versionName=(.*)', package_info)
     if matcher:
-        version=matcher.group(1)
+        version = matcher.group(1)
     else:
-        version=''
+        version = ''
     return version
 
 
@@ -80,8 +98,18 @@ async def get_local_device_packages_version(request: Request, package: PackageEn
 async def get_all_task(request: Request):
     client_host: str = request.client.host
     with connect() as session:
-        all_task = session.query(Task).filter(Task.host == client_host).all()
-        res = [i.to_dict() for i in all_task]
+        all_task = session.query(Task).filter(Task.host == client_host).filter(Task.id != 1).all()
+        logger.info(all_task)
+        res: list = [i.to_dict() for i in all_task]
+        res.reverse()
+        try:
+            if res and res[0].status == 1:
+                res.insert(1, session.query(Task).filter(Task.id == 1).first().to_dict())
+            else:
+                res.insert(0, session.query(Task).filter(Task.id == 1).first().to_dict())
+        except Exception as e:
+            logger.error(e)
+            traceback.print_exc()
         return res
 
 
@@ -132,12 +160,25 @@ async def stop_task(request: Request, id: int):
     return {"code": 200}
 
 
+@app.get("/get_task_status/")
+async def get_task_status(request: Request, id: int):
+    client_host: str = request.client.host
+    with connect() as session:
+        task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
+    return {"status": task_item.status}
+
+
 @app.get("/result/")
 async def run_task(request: Request, id: int):
     client_host: str = request.client.host
     with connect() as session:
         task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
-        result = DataCollect.read_data_all(task_item.file_dir)
+        try:
+            result = DataCollect.read_data_all(task_item.file_dir)
+        except BaseException as e:
+            logger.error(e)
+            traceback.print_exc()
+            return {"result": {}}
         return {"result": result}
 
 
@@ -149,7 +190,6 @@ def adb_devices(adb):
 @func_set_timeout(30)
 def adb_app_list(adb):
     return adb.list_app(third_only=True)
-    
 
 
 if __name__ == "__main__":

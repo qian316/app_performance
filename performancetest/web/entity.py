@@ -12,9 +12,11 @@ class TaskEntity(BaseModel):
     port: int
     package: str
 
+
 class DeviceEntity(BaseModel):
     serialno: str
-    
+
+
 class PackageEntity(BaseModel):
     serialno: str
     package: str
