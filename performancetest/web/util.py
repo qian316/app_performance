@@ -213,7 +213,7 @@ class DataCollect(object):
                 res_dict["jank_number"] = csv_data[:, 4].tolist()[start_index: end_index]
                 res_dict["big_jank_number"] = csv_data[:, 5].tolist()[start_index: end_index]
                 res_dict["ftimege100"] = csv_data[:, 6].tolist()[start_index: end_index]
-            except IndexError as e:
+            except Exception as e:
                 res_dict["full_number"] = 0
                 res_dict["jank_number"] = []
                 res_dict["big_jank_number"] = []

@@ -1,6 +1,7 @@
 # _*_ coding: utf-8 _*_
 import datetime
 import os
+import platform
 import re
 import sys
 import time
@@ -103,7 +104,7 @@ async def get_all_task(request: Request):
         res: list = [i.to_dict() for i in all_task]
         res.reverse()
         try:
-            if res and res[0].status == 1:
+            if res and res[0].get("status") == 1:
                 res.insert(1, session.query(Task).filter(Task.id == 1).first().to_dict())
             else:
                 res.insert(0, session.query(Task).filter(Task.id == 1).first().to_dict())
@@ -133,7 +134,6 @@ async def run_task(request: Request, task: TaskEntity):
         new_task = Task(host=client_host, port=port, serialno=serialno, start_time=datetime.datetime.now(),
                         status=status, file_dir=file_dir, package=package)
         session.add(new_task)
-        session.commit()
         run_all_monitor(serialno, [client_host, port], package, file_dir)
         return_task_id = new_task.id
     return {"code": 200, "taskid": return_task_id}
@@ -165,7 +165,7 @@ async def get_task_status(request: Request, id: int):
     client_host: str = request.client.host
     with connect() as session:
         task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
-    return {"status": task_item.status}
+        return task_item.to_dict()
 
 
 @app.get("/result/")
@@ -174,6 +174,16 @@ async def run_task(request: Request, id: int):
     with connect() as session:
         task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
         try:
+            if task_item.id == 1:
+                if "Windows" in platform.platform():
+                    task_item.file_dir = task_item.file_dir.replace("/", "\\")
+                    _, relative_path = task_item.file_dir.split("test_result\\")
+                else:
+                    task_item.file_dir = task_item.file_dir.replace("\\", "/")
+                    _, relative_path = task_item.file_dir.split("test_result/")
+                parent = os.path.dirname(os.path.abspath(__file__))
+                base, _ = os.path.split(parent)
+                task_item.file_dir = os.path.join(base, "test_result", relative_path)
             result = DataCollect.read_data_all(task_item.file_dir)
         except BaseException as e:
             logger.error(e)

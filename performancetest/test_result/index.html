@@ -65,7 +65,7 @@
             <el-card>任务列表</el-card>
             <el-menu :default-active="taskid" class="el-menu-vertical-demo">
                 <div v-for="item,index in tasklist" :key="item">
-                    <el-menu-item :index="item.id" @click="clicktask(item)">{{item.id === 1? "默认演示任务": item.status === 1
+                    <el-menu-item :index="item.id" @click="clicktask(item.id)">{{item.id === 1? "默认演示任务": item.status === 1
                         ? "当前执行：" + item.start_time : "历史任务：" + item.start_time}}
                     </el-menu-item>
                 </div>
@@ -85,7 +85,7 @@
                         可选设备（下载启动sdk后，系统会自动获取你的电脑上连接的设备）：
                         <br/>
                         <el-radio-group v-model="selectediphone" @change="get_local_device_packages">
-                            <el-radio :label="phone.serialno" v-for="phone in phoneList" :key="phone.serialno">
+                            <el-radio :label="phone.serialno" v-for="phone in phoneList" :key="phone.serialno" :disabled="chosedisable">
                                 <div class="phone-card">
                                     <img src="iphone.png" class="phone-img"/>
                                     <div class="phone-details">
@@ -104,7 +104,7 @@
                     <el-card>
                         <div>
                             选择app：
-                            <el-select v-model="package" placeholder="请选择" @change="get_local_device_packages_version">
+                            <el-select v-model="package" placeholder="请选择" @change="get_local_device_packages_version" :disableed="chosedisable">
                                 <el-option
                                         v-for="item in packages"
                                         :key="item"
@@ -114,8 +114,19 @@
                             </el-select>
                             版本号： {{version}}
                             <div style="float: right;">
-                                <el-button type="success" @click="start_task">开始任务</el-button>
+                                <a href="/sdk/adbsdk.zip" target="_blank"><el-button type="text" >下载android-sdk-window-sdk</el-button></a>
+								<a href="/sdk/adbsdkmac.zip" target="_blank"><el-button type="text" >下载android-sdk-mac-sdk</el-button></a>
+								<el-button type="success" @click="start_task">开始任务</el-button>
                                 <el-button type="danger" @click="stop_task">停止任务</el-button>
+								<el-switch
+								style="display: block"
+								v-model="is_show_end_pic"
+								active-color="#13ce66"
+								inactive-color="#ff4949"
+								active-text="实时显示图片"
+								inactive-text="按年付费">
+								</el-switch>
+								
                             </div>
 
                         </div>
@@ -166,16 +177,19 @@
 			el: '#app',
 			data: function() {
 				return {
-          tasklist:[],
-          version:"",
-          packages: [],
-          package: "",
-          selectediphone: null,
-          phoneList: [
-            
-          ],
+					is_show_end_pic: false,
+					current_task_info: null,
+					chosedisable: false,
+					tasklist:[],
+					version:"",
+					packages: [],
+					package: "",
+					selectediphone: null,
+					phoneList: [
+						
+					],
 //////////////////////////////////////////////////////////// 上面是任务，下面是报告
-          imgs:[], //展示图片的容器
+          			imgs:[], //展示图片的容器
 					taskid: localStorage.getItem("taskid"),
 					loading:true,
 					slidesPerView: 5, //默认显示图片的张数
@@ -248,17 +262,20 @@
 				}
 			},
 			async mounted() {
-        this.openLoading()
-				this.$notify({
-					title: '使用提示',
-					dangerouslyUseHTMLString: true,
-					message: '1.点击图表，显示对应时间的图片<br/>2.点击前后图片,<strong>图表红线会自动切换到对应位置</strong>',
-					duration: 0
-				});
-        await this.get_all_task()
-        this.get_local_device()
+				this.openLoading()
+						this.$notify({
+							title: '使用提示',
+							dangerouslyUseHTMLString: true,
+							message: '1.点击图表，显示对应时间的图片<br/>2.点击前后图片,<strong>图表红线会自动切换到对应位置</strong>',
+							duration: 0
+						});
+				await this.get_all_task()
+				if(this.tasklist){
+					this.clicktask(this.tasklist[0].id)
+				}
+				this.get_local_device()
 				await this.getReportData()
-        this.closeLoading()
+				this.closeLoading()
 				this.clearNoDataType()
 				if (!this.allReportData.public_imgs || this.allReportData.public_imgs.length == 0 || this.allReportData.public_imgs.length == undefined) {
 					return
@@ -266,6 +283,20 @@
 				this.current_click_time_for_mountout = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].relative_time : null
 				this.current_click_time_for_mountout_time = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].time : null
 				this.setAllBrush()
+				setInterval(() => {
+					console.log("调度")
+					this.get_task_status()
+					console.log(this.current_task_info.status, "curr")
+					if (this.current_task_info.status == 1) {
+						console.log("join")
+						this.clicktask(this.taskid);
+						this.chosedisable = true
+					}else{
+						this.chosedisable = false
+						this.get_local_device()
+						this.get_local_device_packages()
+					}
+				}, 1000); // 每 1 秒执行一次
 			},
 			methods: {
         openLoading() {
@@ -503,16 +534,30 @@
           console.log(res)
           this.tasklist = res.data
         },
-        async clicktask(item){
-          localStorage.setItem("taskid", item.id)
-          this.taskid = item.id
+        async clicktask(id){
+          localStorage.setItem("taskid", id)
+          this.taskid = id
+		  await this.get_task_status()
+		  if(this.current_task_info.status == 1){
+			this.$message({
+              message: '任务正在运行中',
+			  duration: 800,
+            });
+			this.chosedisable = true
+			this.package = this.current_task_info.package
+			this.selectediphone = this.current_task_info.serialno
+		  }
           await this.getReportData()
-          this.clearNoDataType()
+        //   this.clearNoDataType()
           if (!this.allReportData.public_imgs || this.allReportData.public_imgs.length == 0 || this.allReportData.public_imgs.length == undefined) {
             return
           }
-          this.current_click_time_for_mountout = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].relative_time : null
-          this.current_click_time_for_mountout_time = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].time : null
+		  if(!this.current_click_time_for_mountout){
+			this.current_click_time_for_mountout = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].relative_time : null
+		  }
+		  if(!this.current_click_time_for_mountout_time){
+			this.current_click_time_for_mountout_time = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].time : null
+		  }
           this.setAllBrush()  
         },
         async get_task_status(){
@@ -520,6 +565,7 @@
 							url: '/get_task_status/',//提交地址
 							params: {"id": this.taskid} 
 					}) 
+		  this.current_task_info = res.data
           return res
         },
         async run_task(){
@@ -557,10 +603,17 @@
               message: '任务启动成功',
               type: 'success'
             });
-          }
+          }else{
+			this.$message({
+              message: res.data,
+            });
+		  }
           this.taskid = res.data.taskid
-          this.get_all_task()
-        }
+		  setTimeout(() => {
+			location.reload() 	
+		  }, 1500);
+		   
+        },
 			}
 		})
 
