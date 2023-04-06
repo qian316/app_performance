@@ -12,7 +12,10 @@ from sqlalchemy.orm import sessionmaker
 
 from performancetest.core.device import logger
 
-engine = create_engine('sqlite:///task.sqlite')
+base_dir = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(base_dir, 'task.sqlite')
+logger.info("db path {0}".format(db_path))
+engine = create_engine('sqlite:///{0}'.format(db_path))
 logger.info("current path {0}".format(os.getcwd()))
 Session = sessionmaker(bind=engine)
 Base = declarative_base()

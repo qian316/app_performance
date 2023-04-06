@@ -177,6 +177,7 @@
 			el: '#app',
 			data: function() {
 				return {
+          time: 0, 
 					// is_show_end_pic: false,
 					current_task_info: null,
 					chosedisable: false,
@@ -283,7 +284,7 @@
 				this.current_click_time_for_mountout = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].relative_time : null
 				this.current_click_time_for_mountout_time = this.allReportData.public_imgs? this.allReportData.public_imgs[parseInt(this.allReportData.public_imgs.length / 2)].time : null
 				this.setAllBrush()
-				setInterval(() => {
+				this.time = setInterval(() => {
 					console.log("调度")
 					this.get_task_status()
 					console.log(this.current_task_info.status, "curr")
@@ -294,10 +295,15 @@
 					}else{
 						this.chosedisable = false
 						this.get_local_device()
-						this.get_local_device_packages()
+            if(this.selectediphone){
+              this.get_local_device_packages()
+            }
 					}
-				}, 1000); // 每 1 秒执行一次
+				}, 3000); // 每 1 秒执行一次
 			},
+      beforeDestroy() {
+        clearInterval(this.intervalId)
+      },
 			methods: {
         openLoading() {
             const loading = this.$loading({

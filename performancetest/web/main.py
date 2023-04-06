@@ -172,18 +172,20 @@ async def get_task_status(request: Request, id: int):
 async def result(request: Request, id: int):
     client_host: str = request.client.host
     with connect() as session:
-        task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
+        if int(id) == 1:
+            task_item = session.query(Task).filter(Task.id == id).first()
+            if "Windows" in platform.platform():
+                task_item.file_dir = task_item.file_dir.replace("/", "\\")
+                _, relative_path = task_item.file_dir.split("test_result\\")
+            else:
+                task_item.file_dir = task_item.file_dir.replace("\\", "/")
+                _, relative_path = task_item.file_dir.split("test_result/")
+            parent = os.path.dirname(os.path.abspath(__file__))
+            base, _ = os.path.split(parent)
+            task_item.file_dir = os.path.join(base, "test_result", relative_path)
+        else:
+            task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
         try:
-            if task_item.id == 1:
-                if "Windows" in platform.platform():
-                    task_item.file_dir = task_item.file_dir.replace("/", "\\")
-                    _, relative_path = task_item.file_dir.split("test_result\\")
-                else:
-                    task_item.file_dir = task_item.file_dir.replace("\\", "/")
-                    _, relative_path = task_item.file_dir.split("test_result/")
-                parent = os.path.dirname(os.path.abspath(__file__))
-                base, _ = os.path.split(parent)
-                task_item.file_dir = os.path.join(base, "test_result", relative_path)
             result = DataCollect.read_data_all(task_item.file_dir)
         except BaseException as e:
             logger.error(e)
@@ -192,7 +194,7 @@ async def result(request: Request, id: int):
         return {"result": result}
 
 
-@func_set_timeout(30)
+@func_set_timeout(5)
 def adb_devices(adb):
     return adb.devices()
 
