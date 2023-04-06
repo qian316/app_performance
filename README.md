@@ -11,7 +11,16 @@
 </ul>
 v1.1.0 目前平台展示：
 
-![](../../Users/happyelements/Desktop/kuaidi/ppp1.png)![](../../Users/happyelements/Desktop/kuaidi/ppp2.png)![](../../Users/happyelements/Desktop/kuaidi/ppp3.png)![](../../Users/happyelements/Desktop/kuaidi/ppp4.png)
+
+![ppp1](https://user-images.githubusercontent.com/56209295/230256398-3c238828-74eb-482d-a4ec-c6827c600246.png)
+
+![ppp2](https://user-images.githubusercontent.com/56209295/230256431-386ac192-8dcc-40b3-b114-3f0a6652b1e6.png)
+
+
+![ppp3](https://user-images.githubusercontent.com/56209295/230256454-4af6d592-c4e1-43f8-b507-c46b3fdf2924.png)
+
+
+![ppp4](https://user-images.githubusercontent.com/56209295/230256463-8193f28f-2b25-4855-8a77-599b67d868bb.png)
 
 v1.1.0 线上地址：
 http://112.126.75.188/
