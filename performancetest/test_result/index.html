@@ -118,14 +118,14 @@
 								<a href="/sdk/adbsdkmac.zip" target="_blank"><el-button type="text" >下载android-sdk-mac-sdk</el-button></a>
 								<el-button type="success" @click="start_task">开始任务</el-button>
                                 <el-button type="danger" @click="stop_task">停止任务</el-button>
-								<el-switch
+								<!-- <el-switch
 								style="display: block"
 								v-model="is_show_end_pic"
 								active-color="#13ce66"
 								inactive-color="#ff4949"
 								active-text="实时显示图片"
 								inactive-text="按年付费">
-								</el-switch>
+								</el-switch> -->
 								
                             </div>
 
@@ -177,7 +177,7 @@
 			el: '#app',
 			data: function() {
 				return {
-					is_show_end_pic: false,
+					// is_show_end_pic: false,
 					current_task_info: null,
 					chosedisable: false,
 					tasklist:[],
@@ -266,7 +266,7 @@
 						this.$notify({
 							title: '使用提示',
 							dangerouslyUseHTMLString: true,
-							message: '1.点击图表，显示对应时间的图片<br/>2.点击前后图片,<strong>图表红线会自动切换到对应位置</strong>',
+							message: '1.下载sdk，解压并执行start.bat/start.sh<br/>2.插入设备<strong>插入设备后会自动检测并展示设备</strong><br/>3.开始任务，下方报告自动刷新为最新报告并实时刷新<br/>4.点击图表，上方图片会切换到对应位置，点击上方图片，图表也会定位到对应位置。',
 							duration: 0
 						});
 				await this.get_all_task()
