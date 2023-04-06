@@ -197,7 +197,7 @@ def adb_devices(adb):
     return adb.devices()
 
 
-@func_set_timeout(30)
+@func_set_timeout(5)
 def adb_app_list(adb):
     return adb.list_app(third_only=True)
 
