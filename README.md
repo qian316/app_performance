@@ -1,4 +1,5 @@
 <h1 align="center">客户端性能测试平台</h1>
+<h2>地址：http://112.126.75.188/ 此地址仅作演示，使用请clone并start.sh/start.bat启动</h2>
 <ul>
     <li>替代perfdog</li>
     <li>自带一个默认数据</li>
