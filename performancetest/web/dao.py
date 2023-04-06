@@ -1,4 +1,5 @@
 # _*_ coding: utf-8 _*_
+import os
 import sys
 
 sys.path.append("../")
@@ -12,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from performancetest.core.device import logger
 
 engine = create_engine('sqlite:///task.sqlite')
+logger.info("current path {0}".format(os.getcwd()))
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 

@@ -169,7 +169,7 @@ async def get_task_status(request: Request, id: int):
 
 
 @app.get("/result/")
-async def run_task(request: Request, id: int):
+async def result(request: Request, id: int):
     client_host: str = request.client.host
     with connect() as session:
         task_item = session.query(Task).filter(Task.id == id).filter(Task.host == client_host).first()
