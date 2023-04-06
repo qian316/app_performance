@@ -1,1 +1,1 @@
-python -m gunicorn performancetest.web.main:app -b 0.0.0.0:80 --reload -k uvicorn.workers.UvicornWorker
+python -m uvicorn performancetest.web.main:app --workers 2 --worker-class uvloop --max-requests 1000 --timeout-keep-alive 15 --limit-concurrency 1000 --proxy-headers --port 80
